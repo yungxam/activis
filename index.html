@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NONAME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<div id="stage" class="nosel">
+  <canvas id="scene"></canvas>
+  <canvas id="fxCanvas"></canvas>
+  <div id="hint">&#9658; CLICK THE COMPUTER</div>
+  <button id="muteBtn" type="button">SOUND: OFF</button>
+  <div id="dialogue">
+    <div id="dialogueBox">
+      <div id="dialogueText"><span class="spk">Sam:</span> <span id="dialogueLine"></span></div>
+      <div id="dialogueArrow">&#9660;</div>
+      <div id="dialogueTail"></div>
+    </div>
+  </div>
+  <div id="overlay">
+    <div id="desktop">
+      <div id="deskIcons">
+        <div class="dicon" data-app="images"><canvas width="32" height="32"></canvas><span>IMAGES</span></div>
+        <div class="dicon" data-app="noname"><canvas width="32" height="32"></canvas><span>NONAME</span></div>
+        <div class="dicon" data-app="notepad"><canvas width="32" height="32"></canvas><span>Notepad</span></div>
+      </div>
+      <div class="dicon dicon-bin" data-app="recycle"><canvas width="32" height="32"></canvas><span>Recycle Bin</span></div>
+      <div id="windows"></div>
+      <div id="taskbar">
+        <button id="startBtn" type="button"><canvas id="startFlag" width="18" height="16"></canvas><span>Start</span></button>
+        <div id="taskbarTabs"></div>
+        <div id="tray"><button id="backBtn" type="button">&#9664;&nbsp;Desk</button><span id="trayClock">--:--</span></div>
+      </div>
+      <div id="introModal">
+        <div id="introDialog" class="dlg">
+          <div class="dlg-title"><span>NONAME_OS</span><button class="dlg-x" type="button" tabindex="-1">&#10005;</button></div>
+          <div class="dlg-main"><div class="dlg-icon">&#10005;</div><div class="dlg-msg"></div></div>
+          <div class="dlg-btns"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./vendor/three.min.js"></script>
+<script src="./js/hand-sprite.js"></script>
+<script src="./js/beer-sprite.js"></script>
+<script src="./js/poster-sprite.js"></script>
+<script src="./js/main.js"></script>
+</body>
+</html>

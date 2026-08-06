@@ -1,0 +1,8 @@
+# generated artifact bundle (build output)
+noname-bundle.html
+# raw gallery originals — kept local, only optimized versions are committed
+gallery/originals/
+# misc
+node_modules/
+.DS_Store
+*.log
