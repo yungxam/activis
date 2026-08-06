@@ -1,12 +1,19 @@
 // Build the IMAGES gallery.
 //
-// Scans gallery/originals/ and produces, for every image:
+// For every file in gallery/originals/ this produces:
 //   gallery/thumbs/<id>.webp  (small grid thumbnail)
 //   gallery/full/<id>.jpg     (downscaled full-size for the lightbox)
-//   gallery/manifest.json     (the list the desktop reads)
+// and merges an entry into gallery/manifest.json (the list the desktop reads).
 //
-// Originals are never served directly (they can be huge); only the optimized
-// versions are. Run locally with `npm run build:gallery`, or let the GitHub
+// Originals are "consumed": after a file is successfully processed it is
+// DELETED from gallery/originals/. Only the small optimized versions are kept
+// and served, so the repo stays lean and scales to hundreds of images. Keep
+// your own copies of the originals — the repo doesn't retain them.
+//
+// The manifest ACCUMULATES: existing entries are preserved and new/re-uploaded
+// ones are merged in, so you can add images in batches over time.
+//
+// Run locally with `npm install && npm run build:gallery`, or let the GitHub
 // Action do it automatically on push.
 
 import sharp from 'sharp';
@@ -25,6 +32,7 @@ const THUMB_Q = 72;       // webp quality
 const FULL_Q = 82;        // jpeg quality
 
 const EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif', '.tif', '.tiff', '.heic', '.heif', '.bmp']);
+const KEEP = new Set(['.gitkeep', 'README.md']); // never delete these from originals/
 
 function slugify(name) {
   return name.replace(/\.[^.]+$/, '')
@@ -33,28 +41,38 @@ function slugify(name) {
     .toLowerCase() || 'img';
 }
 
+function naturalCmp(a, b) {
+  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+}
+
 async function main() {
   await fs.mkdir(THUMB_DIR, { recursive: true });
   await fs.mkdir(FULL_DIR, { recursive: true });
 
-  let entries = [];
+  // Load existing manifest so batches accumulate.
+  const byId = new Map();
   try {
-    entries = (await fs.readdir(SRC))
+    const prev = JSON.parse(await fs.readFile(MANIFEST, 'utf8'));
+    if (Array.isArray(prev)) for (const it of prev) if (it && it.id) byId.set(it.id, it);
+  } catch { /* no manifest yet */ }
+
+  let files = [];
+  try {
+    files = (await fs.readdir(SRC))
       .filter((f) => !f.startsWith('.') && EXT.has(path.extname(f).toLowerCase()))
-      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+      .sort(naturalCmp);
   } catch {
-    console.log('No gallery/originals/ directory yet — writing empty manifest.');
+    console.log('No gallery/originals/ directory.');
   }
 
-  const manifest = [];
-  const seen = new Set();
-  const keepThumb = new Set();
-  const keepFull = new Set();
+  let added = 0, skipped = 0;
+  const usedIds = new Set(byId.keys());
 
-  for (const file of entries) {
+  for (const file of files) {
+    // Stable id from filename; if it collides with a different existing file, suffix it.
     let id = slugify(file), base = id, n = 2;
-    while (seen.has(id)) id = base + '-' + (n++);
-    seen.add(id);
+    while (usedIds.has(id) && !sameSource(byId.get(id), file)) id = base + '-' + (n++);
+    usedIds.add(id);
 
     const src = path.join(SRC, file);
     const thumbName = id + '.webp';
@@ -70,40 +88,33 @@ async function main() {
         .jpeg({ quality: FULL_Q, mozjpeg: true })
         .toFile(path.join(FULL_DIR, fullName));
 
-      manifest.push({
+      byId.set(id, {
         id: id,
+        src: file,
         thumb: 'thumbs/' + thumbName,
         full: 'full/' + fullName,
         w: info.width,
         h: info.height,
         alt: id.replace(/[-_]+/g, ' ').trim()
       });
-      keepThumb.add(thumbName);
-      keepFull.add(fullName);
+
+      // Consume the original.
+      await fs.unlink(src);
+      added++;
       console.log('ok   ' + file + '  ->  ' + id);
     } catch (e) {
+      skipped++;
       console.error('skip ' + file + '  (' + e.message + ')');
     }
   }
 
-  // Prune generated files whose original is gone.
-  await prune(THUMB_DIR, keepThumb, '.webp');
-  await prune(FULL_DIR, keepFull, '.jpg');
-
+  const manifest = Array.from(byId.values()).sort((a, b) => naturalCmp(a.src || a.id, b.src || b.id));
   await fs.writeFile(MANIFEST, JSON.stringify(manifest));
-  console.log('\nmanifest.json written — ' + manifest.length + ' image(s).');
+  console.log('\nmanifest.json: ' + manifest.length + ' image(s) total (' + added + ' new, ' + skipped + ' skipped).');
 }
 
-async function prune(dir, keep, ext) {
-  let files = [];
-  try { files = await fs.readdir(dir); } catch { return; }
-  for (const f of files) {
-    if (f.startsWith('.')) continue;
-    if (path.extname(f).toLowerCase() === ext && !keep.has(f)) {
-      await fs.unlink(path.join(dir, f));
-      console.log('prune ' + path.basename(dir) + '/' + f);
-    }
-  }
+function sameSource(entry, file) {
+  return entry && entry.src === file;
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
