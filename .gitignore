@@ -1,8 +1,7 @@
 # generated artifact bundle (build output)
 noname-bundle.html
-# raw gallery originals — kept local, only optimized versions are committed
-gallery/originals/
-# misc
+# node deps for the gallery build script
 node_modules/
+# misc
 .DS_Store
 *.log

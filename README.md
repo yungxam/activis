@@ -21,5 +21,23 @@ python3 -m http.server 8000
 - `gallery/` — the IMAGES gallery (thumbs + full + manifest, generated)
 - `tools/` — build scripts
 
+## The IMAGES gallery
+The desktop **IMAGES** folder shows a thumbnail grid; clicking a thumbnail opens
+a full-size lightbox (arrow keys / on-screen arrows to browse, Esc to close).
+
+To add images:
+1. Put your originals in **`gallery/originals/`** (any format — JPG, PNG, WEBP, HEIC…).
+2. Commit & push.
+3. The **Build gallery** GitHub Action (`.github/workflows/gallery.yml`) runs
+   automatically: it generates optimized thumbnails (`gallery/thumbs/`), full-size
+   images (`gallery/full/`), and `gallery/manifest.json`, then commits them back.
+
+No local tooling required. To rebuild locally instead:
+```
+npm install
+npm run build:gallery
+```
+
 ## Deploy
-Served as a static site via GitHub Pages.
+Served as a static site via GitHub Pages. `.nojekyll` is present so all files
+(including `vendor/` and `gallery/`) are served verbatim.

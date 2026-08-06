@@ -1143,13 +1143,85 @@
     },
 
     /* ---------- Win95 windows ---------- */
+    loadGallery: function (bodyEl) {
+      var self = this;
+      var grid = bodyEl.querySelector('.gal-grid');
+      var countEl = bodyEl.querySelector('.gal-count');
+      if (!grid) return;
+      var emptyMsg = '<div class="gal-empty"><b>This folder is empty.</b>' +
+        '<span>Add images to <b>gallery/originals/</b> &mdash; they appear here automatically.</span></div>';
+      fetch('./gallery/manifest.json', { cache: 'no-cache' })
+        .then(function (r) { if (!r.ok) throw new Error('no manifest'); return r.json(); })
+        .then(function (items) {
+          if (!items || !items.length) { grid.classList.add('gal-msg'); grid.innerHTML = emptyMsg; if (countEl) countEl.textContent = '0 object(s)'; return; }
+          grid.classList.remove('gal-msg');
+          grid.innerHTML = '';
+          items.forEach(function (it, idx) {
+            var cell = document.createElement('button');
+            cell.type = 'button'; cell.className = 'gal-cell';
+            var img = document.createElement('img');
+            img.loading = 'lazy'; img.decoding = 'async';
+            img.src = './gallery/' + it.thumb;
+            img.alt = it.alt || it.id || ('image ' + (idx + 1));
+            cell.appendChild(img);
+            cell.addEventListener('click', function () { self.openLightbox(items, idx); });
+            grid.appendChild(cell);
+          });
+          if (countEl) countEl.textContent = items.length + ' object(s)';
+        })
+        .catch(function () { grid.classList.add('gal-msg'); grid.innerHTML = emptyMsg; if (countEl) countEl.textContent = '0 object(s)'; });
+    },
+    openLightbox: function (items, idx) {
+      var self = this;
+      var lb = this._lb;
+      if (!lb) {
+        lb = document.createElement('div'); lb.className = 'gal-lightbox';
+        lb.innerHTML =
+          '<div class="glb-backdrop"></div>' +
+          '<img class="glb-img" alt="">' +
+          '<button class="glb-close" type="button" aria-label="Close">&#10005;</button>' +
+          '<button class="glb-nav glb-prev" type="button" aria-label="Previous">&#8249;</button>' +
+          '<button class="glb-nav glb-next" type="button" aria-label="Next">&#8250;</button>' +
+          '<div class="glb-cap"></div>';
+        els.desktop.appendChild(lb);
+        var close = function () { lb.classList.remove('open'); };
+        lb.querySelector('.glb-close').addEventListener('click', close);
+        lb.querySelector('.glb-backdrop').addEventListener('click', close);
+        lb.querySelector('.glb-prev').addEventListener('click', function (e) { e.stopPropagation(); self._lbGo(-1); });
+        lb.querySelector('.glb-next').addEventListener('click', function (e) { e.stopPropagation(); self._lbGo(1); });
+        document.addEventListener('keydown', function (e) {
+          if (!lb.classList.contains('open')) return;
+          if (e.key === 'Escape') close();
+          else if (e.key === 'ArrowLeft') self._lbGo(-1);
+          else if (e.key === 'ArrowRight') self._lbGo(1);
+        });
+        this._lb = lb;
+      }
+      this._lbItems = items; this._lbIdx = idx;
+      this._lbShow(); lb.classList.add('open'); this.blip(660, 0.03);
+    },
+    _lbGo: function (d) {
+      if (!this._lbItems) return;
+      var n = this._lbItems.length;
+      this._lbIdx = (this._lbIdx + d + n) % n;
+      this._lbShow();
+    },
+    _lbShow: function () {
+      var it = this._lbItems[this._lbIdx];
+      var img = this._lb.querySelector('.glb-img');
+      var cap = this._lb.querySelector('.glb-cap');
+      img.src = './gallery/' + it.full;
+      img.alt = it.alt || it.id || '';
+      if (cap) cap.textContent = (this._lbIdx + 1) + ' / ' + this._lbItems.length;
+      var multi = this._lbItems.length > 1;
+      this._lb.querySelector('.glb-prev').style.display = multi ? '' : 'none';
+      this._lb.querySelector('.glb-next').style.display = multi ? '' : 'none';
+    },
     winInfo: function (kind) {
       var menu = '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span></div>';
       if (kind === 'images') {
-        var cells = '';
-        for (var i = 1; i <= 6; i++) cells += '<div class="img-cell">IMG_' + ('0' + i).slice(-2) + '.JPG</div>';
-        return { title: 'IMAGES', icon: 'folder', width: 330,
-          body: menu + '<div class="win-inset"><div class="img-grid">' + cells + '</div><div class="win-note">[ PLACEHOLDER &mdash; drop your images here ]</div></div>' };
+        return { title: 'IMAGES', icon: 'folder', width: 470, height: 360,
+          body: menu + '<div class="win-inset gal-inset"><div class="gal-grid">Loading gallery&hellip;</div></div><div class="win-status"><span class="gal-count">&mdash;</span></div>' };
       }
       if (kind === 'noname') {
         return { title: 'NONAME', icon: 'folder', width: 320,
@@ -1200,6 +1272,7 @@
       var win = document.createElement('div');
       win.className = 'win active';
       win.style.left = x + 'px'; win.style.top = y + 'px'; win.style.width = info.width + 'px';
+      if (info.height) win.style.height = info.height + 'px';
 
       var title = document.createElement('div'); title.className = 'win-title';
       var tIcon = document.createElement('canvas'); tIcon.width = 16; tIcon.height = 16; tIcon.className = 'win-titleicon';
@@ -1223,6 +1296,8 @@
       st.restore = function () { win.style.display = ''; self.focusWindow(win); if (st.tab) { st.tab.remove(); st.tab = null; } };
 
       win.addEventListener('pointerdown', function () { self.focusWindow(win); });
+
+      if (kind === 'images') self.loadGallery(body);
 
       bClose.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); if (st.tab) st.tab.remove(); win.remove(); });
       bMin.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); self.minimizeWindow(st); });
