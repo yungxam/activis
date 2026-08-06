@@ -85,6 +85,20 @@
     },
     click: function () { this.blip(1300, 0.04, 'square'); },
     beep: function () { this.blip(720, 0.11, 'square'); },
+    playBeerSound: function () {
+      if (this.muted) return;
+      if (!this._beerSnd) {
+        this._beerSnd = new Audio(window.BEER_AUDIO || './assets/beer-drink.mp3');
+        this._beerSnd.preload = 'auto';
+        this._beerSnd.volume = 0.9;
+      }
+      try {
+        this._beerSnd.pause();
+        this._beerSnd.currentTime = 0;
+        var p = this._beerSnd.play();
+        if (p && p.catch) p.catch(function () {});
+      } catch (e) {}
+    },
     toggleMute: function () {
       this.muted = !this.muted;
       if (this.master) this.master.gain.value = this.muted ? 0 : 0.5;
@@ -854,6 +868,7 @@
     drinkBeer: function () {
       if (this.drinking) return;
       this.drinking = true; this.beep();
+      this.playBeerSound();
       var self = this, fx = els.fx, fctx = fx.getContext('2d');
 
       var rect = els.stage.getBoundingClientRect();
