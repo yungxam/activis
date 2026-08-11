@@ -487,9 +487,52 @@
       // MOUSEPAD + MOUSE
       add(B(0.52, 0.014, 0.4), darkM, 0.74, DESK_TOP + 0.007, 0.22);
       var padTop = new T.Mesh(P(0.52, 0.4), padM); padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.015, 0.22); padTop.receiveShadow = true; scene.add(padTop);
-      var ms = new T.Group(); ms.position.set(0.74, DESK_TOP + 0.015, 0.17); scene.add(ms);
-      var mb = new T.Mesh(B(0.1, 0.03, 0.16), grayM); mb.position.y = 0.016; mb.castShadow = true; mb.receiveShadow = true; ms.add(mb);
-      var mh = new T.Mesh(B(0.085, 0.03, 0.1), grayM); mh.position.y = 0.038; mh.castShadow = true; ms.add(mh);
+      // classic beige ball mouse: rounded low-poly shell, button seams, scroll
+      // wheel, darker base, cord running off toward the tower (front = -z)
+      var ms = new T.Group(); ms.position.set(0.74, DESK_TOP + 0.015, 0.17); ms.rotation.y = -0.16; scene.add(ms);
+      var mSeamM = PHF({ color: 0x6b6558, specular: 0x111111, shininess: 8 });
+      var mBaseM = PHF({ color: 0xbdb49c, specular: 0x333333, shininess: 20 });
+      var mWheelM = PHF({ color: 0xc9ccd1, specular: 0x555555, shininess: 30 });
+      var mBase = new T.Mesh(new T.CylinderGeometry(1, 1, 1, 12), mBaseM);
+      mBase.scale.set(0.0475, 0.016, 0.078);
+      mBase.position.set(0, 0.008, 0.01); mBase.castShadow = true; mBase.receiveShadow = true; ms.add(mBase);
+      // shell: scaled low-poly hemisphere (R=0.08), flat-shaded
+      var MR = 0.08, MSX = 0.64, MSY = 0.52, MSZ = 1.04, MDY = 0.016, MDZ = 0.01;
+      var mShell = new T.Mesh(new T.SphereGeometry(MR, 12, 7, 0, Math.PI * 2, 0, Math.PI / 2), grayM);
+      mShell.scale.set(MSX, MSY, MSZ);
+      mShell.position.set(0, MDY, MDZ);
+      mShell.castShadow = true; mShell.receiveShadow = true; ms.add(mShell);
+      // panel seams: thin tubes lying on the shell surface
+      var seamTube = function (pts) {
+        var m = new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 24, 0.0035, 5, false), mSeamM);
+        ms.add(m); return m;
+      };
+      var surf = function (xu, yu, zu) { // unscaled sphere point -> shell surface (pushed slightly proud)
+        return new T.Vector3(xu * MSX * 1.012, yu * MSY * 1.012 + MDY, zu * MSZ * 1.012 + MDZ);
+      };
+      // seam across the shell (separates buttons from palm rest)
+      var zc = -0.024, rc = Math.sqrt(MR * MR - zc * zc), sa = [];
+      for (var st = 0; st <= 10; st++) { var th = (st / 10) * Math.PI; sa.push(surf(rc * Math.cos(th), rc * Math.sin(th), zc)); }
+      seamTube(sa);
+      // seam down the middle of the buttons (front rim up to the cross seam)
+      var sm = [], psiMax = Math.acos(-zc / MR);
+      for (var sp = 0; sp <= 8; sp++) { var ps = 0.06 + (sp / 8) * (psiMax - 0.06); sm.push(surf(0, MR * Math.sin(ps), -MR * Math.cos(ps))); }
+      seamTube(sm);
+      // scroll wheel poking through a dark slot between the buttons
+      var mSlot = new T.Mesh(B(0.022, 0.014, 0.046), darkM);
+      mSlot.position.set(0, 0.044, -0.038); mSlot.rotation.x = 0.32; ms.add(mSlot);
+      var mWheel = new T.Mesh(new T.CylinderGeometry(0.019, 0.019, 0.011, 10), mWheelM);
+      mWheel.rotation.z = Math.PI / 2;
+      mWheel.position.set(0, 0.049, -0.034); mWheel.castShadow = true; ms.add(mWheel);
+      // cord: cream tube snaking from the nose toward the tower
+      var cordPts = [
+        new T.Vector3(0, 0.012, -0.082),
+        new T.Vector3(-0.02, 0.006, -0.16),
+        new T.Vector3(0.05, 0.004, -0.26),
+        new T.Vector3(0.14, 0.004, -0.34),
+      ];
+      var mCord = new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(cordPts), 14, 0.0055, 5, false), grayM);
+      mCord.castShadow = true; mCord.receiveShadow = true; ms.add(mCord);
 
       // ---- ASHTRAY + CIGARETTES + PACK + BEER CANS (chunky, low-poly, PS2 style) ----
 
