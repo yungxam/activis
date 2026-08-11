@@ -430,6 +430,12 @@
       var posterFrameM = PHF({ color: 0xb8b4a8, specular: 0x161616, shininess: 5 });
       // artwork poster (loaded from the supplied image) for the left wall slot
       var posterArtM = posterM;
+      var posterArt2M = posterM;
+      if (window.POSTER_SONIC) {
+        var artTex2 = new T.TextureLoader().load(window.POSTER_SONIC);
+        artTex2.encoding = T.sRGBEncoding; artTex2.anisotropy = 4;
+        posterArt2M = PHF({ map: artTex2, specular: 0x0a0a0a, shininess: 2 });
+      }
       if (window.POSTER_XMAS) {
         var artTex = new T.TextureLoader().load(window.POSTER_XMAS);
         artTex.encoding = T.sRGBEncoding;
@@ -489,7 +495,7 @@
       var padTop = new T.Mesh(P(0.52, 0.4), padM); padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.015, 0.22); padTop.receiveShadow = true; scene.add(padTop);
       // classic beige ball mouse: rounded low-poly shell, button seams, scroll
       // wheel, darker base, cord running off toward the tower (front = -z)
-      var ms = new T.Group(); ms.position.set(0.74, DESK_TOP + 0.015, 0.17); ms.rotation.y = -0.16; scene.add(ms);
+      var ms = new T.Group(); ms.position.set(0.74, DESK_TOP + 0.015, 0.22); ms.rotation.y = -0.16; scene.add(ms);
       var mSeamM = PHF({ color: 0x45413a, specular: 0x0a0a0a, shininess: 6 });
       var mBaseM = PHF({ color: 0xbdb49c, specular: 0x333333, shininess: 20 });
       var mWheelM = PHF({ color: 0xc9ccd1, specular: 0x555555, shininess: 30 });
@@ -526,7 +532,7 @@
       mWheel.position.set(0, 0.04, -0.036); ms.add(mWheel);
       // cord: hugs the desk, runs alongside the tower and disappears behind it
       var cordPts = [
-        new T.Vector3(0.753, DESK_TOP + 0.026, 0.089),
+        new T.Vector3(0.753, DESK_TOP + 0.026, 0.139),
         new T.Vector3(0.71, DESK_TOP + 0.016, -0.01),
         new T.Vector3(0.695, DESK_TOP + 0.006, -0.18),
         new T.Vector3(0.715, DESK_TOP + 0.006, -0.45),
@@ -683,7 +689,7 @@
         panel.position.set(x, y, -1.69); panel.receiveShadow = true; scene.add(panel);
       };
       makePoster(-1.12, 1.72, 0.85, 1.134, posterArtM);
-      makePoster(0.5, 1.95, 0.945, 1.26);
+      makePoster(0.5, 1.95, 0.945, 1.26, posterArt2M);
 
       // compute screen-facing fly-in target from the angled monitor
       mg.updateWorldMatrix(true, true);
