@@ -491,11 +491,20 @@
       var kt = new T.Mesh(P(1.16, 0.42), keyTop); kt.rotation.x = -Math.PI / 2; kt.position.y = 0.031; kt.receiveShadow = true; kg.add(kt);
 
       // MOUSEPAD + MOUSE
-      add(B(0.52, 0.014, 0.4), darkM, 0.74, DESK_TOP + 0.007, 0.22);
-      var padTop = new T.Mesh(P(0.52, 0.4), padM); padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.015, 0.22); padTop.receiveShadow = true; scene.add(padTop);
+      if (window.PAD_SKIN) {
+        var padSkinTex = new T.TextureLoader().load(window.PAD_SKIN);
+        padSkinTex.encoding = T.sRGBEncoding; padSkinTex.anisotropy = 4;
+        var padSkinM = ps1(new T.MeshPhongMaterial({ map: padSkinTex, transparent: true, alphaTest: 0.5, specular: 0x141414, shininess: 16 }));
+        var PADW = 0.46, PADHT = PADW * 521 / 509;
+        var padTop = new T.Mesh(P(PADW, PADHT), padSkinM);
+        padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.006, 0.2); padTop.receiveShadow = true; scene.add(padTop);
+      } else {
+        add(B(0.52, 0.014, 0.4), darkM, 0.74, DESK_TOP + 0.007, 0.22);
+        var padTop = new T.Mesh(P(0.52, 0.4), padM); padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.015, 0.22); padTop.receiveShadow = true; scene.add(padTop);
+      }
       // classic beige ball mouse: rounded low-poly shell, button seams, scroll
       // wheel, darker base, cord running off toward the tower (front = -z)
-      var ms = new T.Group(); ms.position.set(0.74, DESK_TOP + 0.015, 0.22); ms.rotation.y = -0.16; scene.add(ms);
+      var ms = new T.Group(); ms.position.set(0.83, DESK_TOP + 0.007, 0.2); ms.rotation.y = -0.16; scene.add(ms);
       var mSeamM = PHF({ color: 0x45413a, specular: 0x0a0a0a, shininess: 6 });
       var mBaseM = PHF({ color: 0xbdb49c, specular: 0x333333, shininess: 20 });
       var mWheelM = PHF({ color: 0xc9ccd1, specular: 0x555555, shininess: 30 });
@@ -532,7 +541,7 @@
       mWheel.position.set(0, 0.04, -0.036); ms.add(mWheel);
       // cord: hugs the desk, runs alongside the tower and disappears behind it
       var cordPts = [
-        new T.Vector3(0.753, DESK_TOP + 0.026, 0.139),
+        new T.Vector3(0.843, DESK_TOP + 0.018, 0.119),
         new T.Vector3(0.71, DESK_TOP + 0.016, -0.01),
         new T.Vector3(0.695, DESK_TOP + 0.006, -0.18),
         new T.Vector3(0.715, DESK_TOP + 0.006, -0.45),
