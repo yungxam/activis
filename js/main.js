@@ -543,7 +543,7 @@
       mCord.castShadow = true; mCord.receiveShadow = true; scene.add(mCord);
 
       // ---- STANDING PHOTO FRAME (left of the monitor) ----
-      var pfG = new T.Group(); pfG.position.set(-0.92, DESK_TOP + 0.004, -0.38); pfG.rotation.y = 0.42; scene.add(pfG);
+      var pfG = new T.Group(); pfG.position.set(-1.02, DESK_TOP + 0.004, -0.56); pfG.rotation.y = 0.42; scene.add(pfG);
       var pfTilt = new T.Group(); pfTilt.rotation.x = -0.14; pfG.add(pfTilt);
       var FW = 0.24, FH = 0.3, FD = 0.02;
       var pfFrameM = PHF({ color: 0x1a181d, emissive: 0x000000, specular: 0x111111, shininess: 18 });
