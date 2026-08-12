@@ -542,6 +542,31 @@
       var mCord = new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(cordPts), 24, 0.0055, 5, false), grayM);
       mCord.castShadow = true; mCord.receiveShadow = true; scene.add(mCord);
 
+      // ---- STANDING PHOTO FRAME (left of the monitor) ----
+      var pfG = new T.Group(); pfG.position.set(-0.78, DESK_TOP + 0.004, -0.18); pfG.rotation.y = 0.42; scene.add(pfG);
+      var pfTilt = new T.Group(); pfTilt.rotation.x = -0.14; pfG.add(pfTilt);
+      var FW = 0.24, FH = 0.3, FD = 0.02;
+      var pfFrameM = PHF({ color: 0x1a181d, emissive: 0x000000, specular: 0x111111, shininess: 18 });
+      var pfMatM = PHF({ color: 0xf2efe9, specular: 0x111111, shininess: 4 });
+      var pfStandM = PHF({ color: 0x9a6b42, specular: 0x111111, shininess: 6 });
+      var pfBox = new T.Mesh(B(FW, FH, FD), pfFrameM);
+      pfBox.position.y = FH / 2; pfBox.castShadow = true; pfBox.receiveShadow = true; pfTilt.add(pfBox);
+      var pfMat = new T.Mesh(P(FW * 0.8, FH * 0.84), pfMatM);
+      pfMat.position.set(0, FH / 2, FD / 2 + 0.0012); pfTilt.add(pfMat);
+      var pfPhotoM = pfMatM;
+      if (window.DESK_PHOTO) {
+        var phTex = new T.TextureLoader().load(window.DESK_PHOTO);
+        phTex.encoding = T.sRGBEncoding; phTex.anisotropy = 4;
+        pfPhotoM = PHF({ map: phTex, specular: 0x0a0a0a, shininess: 3 });
+      }
+      var pfPhoto = new T.Mesh(P(FW * 0.645, FH * 0.6467), pfPhotoM);
+      pfPhoto.position.set(0, FH / 2, FD / 2 + 0.0024); pfTilt.add(pfPhoto);
+      // kickstand wedge propping it up from behind
+      var pfStand = new T.Mesh(B(0.085, FH * 0.62, 0.012), pfStandM);
+      pfStand.rotation.x = 0.46;
+      pfStand.position.set(0, 0.088, -0.08);
+      pfStand.castShadow = true; pfG.add(pfStand);
+
       // ---- ASHTRAY + CIGARETTES + PACK + BEER CANS (chunky, low-poly, PS2 style) ----
 
       // a used cigarette butt centered at origin: burnt ash tip at -x, white paper, cork filter at +x
