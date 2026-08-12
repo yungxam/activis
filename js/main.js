@@ -24,6 +24,7 @@
     dialogue: document.getElementById('dialogue'),
     dialogueBox: document.getElementById('dialogueBox'),
     dialogueLine: document.getElementById('dialogueLine'),
+    dialogueArrow: document.getElementById('dialogueArrow'),
     introModal: document.getElementById('introModal'),
     introMsg: document.querySelector('#introDialog .dlg-msg'),
     introBtns: document.querySelector('#introDialog .dlg-btns'),
@@ -45,6 +46,19 @@
       "please don't touch anything on my desk...",
       "and also please don't smoke in here!",
     ],
+    smokeLines: [
+      'Ayoo!?? What did I tell you??',
+      'Whatever...',
+      'Can you give me one too??',
+    ],
+    beerLines: [
+      'Dude what the helly, how about asking if you can have a beer!??',
+      'Alright there goes the second one...',
+      'Your family is right...You do have a drinking problem...',
+    ],
+    smokeCount: 0,
+    beerCount: 0,
+    reactionActive: false,
     // desktop intro quiz (Win95 error-dialog style); must be completed to use the desktop
     quizTree: {
       q1: { msg: 'Are you friends with sam?', buttons: [{ label: 'Yes', go: 'yes' }, { label: 'No', go: 'no' }] },
@@ -780,7 +794,12 @@
           if (!self.smoking && self.ray.intersectObjects(self.cigTargets, false).length) self.smoke();
         }
       });
-      els.dialogueBox.addEventListener('click', function (e) { e.stopPropagation(); self.advanceIntro(); });
+      els.dialogueBox.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (self.typing()) { self.finishType(); return; }
+        if (self.reactionActive) { self.initAudio(); self.blip(900, 0.03); self.dismissReaction(); return; }
+        self.advanceIntro();
+      });
 
       // taskbar tray clock
       var tick = function () {
@@ -945,6 +964,7 @@
           fctx.setTransform(1, 0, 0, 1, 0, 0); fctx.clearRect(0, 0, fx.width, fx.height);
           self.smoking = false;
           if (self.view === 'desk') els.hint.style.display = 'block';
+          self.showReaction(self.smokeLines, self.smokeCount++);
         }
       };
       self.smokeRaf = requestAnimationFrame(draw);
@@ -1011,6 +1031,7 @@
           fctx.setTransform(1, 0, 0, 1, 0, 0); fctx.clearRect(0, 0, fx.width, fx.height);
           self.drinking = false;
           if (self.view === 'desk') els.hint.style.display = 'block';
+          self.showReaction(self.beerLines, self.beerCount++);
         }
       };
       self.drinkRaf = requestAnimationFrame(draw);
@@ -1149,24 +1170,57 @@
       g.restore();
     },
 
+    // Pokemon-style typewriter: text sweeps in left-to-right, fast
+    typeLine: function (text) {
+      var self = this;
+      if (this._typeTimer) { clearInterval(this._typeTimer); this._typeTimer = null; }
+      this._typeText = text;
+      els.dialogueLine.textContent = '';
+      if (els.dialogueArrow) els.dialogueArrow.style.visibility = 'hidden';
+      var i = 0;
+      this._typeTimer = setInterval(function () {
+        i += 1;
+        els.dialogueLine.textContent = text.slice(0, i);
+        if (i >= text.length) self.finishType();
+      }, 20);
+    },
+    finishType: function () {
+      if (this._typeTimer) { clearInterval(this._typeTimer); this._typeTimer = null; }
+      if (this._typeText != null) els.dialogueLine.textContent = this._typeText;
+      if (els.dialogueArrow) els.dialogueArrow.style.visibility = 'visible';
+    },
+    typing: function () { return !!this._typeTimer; },
     startIntro: function () {
       if (this._introShown) return;
       this._introShown = true; this.introActive = true; this.introIndex = 0;
       els.hint.style.display = 'none';
-      els.dialogueLine.textContent = this.introMessages[0];
       els.dialogue.style.display = 'block';
+      this.typeLine(this.introMessages[0]);
     },
     advanceIntro: function () {
       if (!this.introActive) return;
       this.initAudio(); this.blip(900, 0.03);
       this.introIndex++;
       if (this.introIndex < this.introMessages.length) {
-        els.dialogueLine.textContent = this.introMessages[this.introIndex];
+        this.typeLine(this.introMessages[this.introIndex]);
       } else {
         this.introActive = false;
         els.dialogue.style.display = 'none';
         if (this.view === 'desk') els.hint.style.display = 'block';
       }
+    },
+    // one-off reaction bubble after smoking/drinking
+    showReaction: function (lines, n) {
+      if (this.view !== 'desk') return;
+      this.reactionActive = true;
+      els.hint.style.display = 'none';
+      els.dialogue.style.display = 'block';
+      this.typeLine(lines[Math.min(n, lines.length - 1)]);
+    },
+    dismissReaction: function () {
+      this.reactionActive = false;
+      els.dialogue.style.display = 'none';
+      if (this.view === 'desk' && !this.introActive) els.hint.style.display = 'block';
     },
 
     flyIn: function () {
