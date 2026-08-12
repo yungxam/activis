@@ -495,9 +495,9 @@
         var padSkinTex = new T.TextureLoader().load(window.PAD_SKIN);
         padSkinTex.encoding = T.sRGBEncoding; padSkinTex.anisotropy = 4;
         var padSkinM = ps1(new T.MeshPhongMaterial({ map: padSkinTex, transparent: true, alphaTest: 0.5, specular: 0x141414, shininess: 16 }));
-        var PADW = 0.46, PADHT = PADW * 521 / 509;
+        var PADW = 0.56, PADHT = PADW * 521 / 509;
         var padTop = new T.Mesh(P(PADW, PADHT), padSkinM);
-        padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.006, 0.2); padTop.receiveShadow = true; scene.add(padTop);
+        padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.006, 0.24); padTop.receiveShadow = true; scene.add(padTop);
       } else {
         add(B(0.52, 0.014, 0.4), darkM, 0.74, DESK_TOP + 0.007, 0.22);
         var padTop = new T.Mesh(P(0.52, 0.4), padM); padTop.rotation.x = -Math.PI / 2; padTop.position.set(0.74, DESK_TOP + 0.015, 0.22); padTop.receiveShadow = true; scene.add(padTop);
