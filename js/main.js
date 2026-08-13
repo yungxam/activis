@@ -1355,8 +1355,8 @@
           row.appendChild(document.createTextNode(val));
           info.appendChild(row);
         };
-        mk('fav color:', e.color, true);
-        mk('wants to learn:', e.learn, false);
+        mk('My favorite color is...', e.color, true);
+        mk('I want to learn how to...', e.learn, false);
         var note = document.createElement('div'); note.className = 'fb-note'; note.textContent = '\u201c' + e.note + '\u201d';
         info.appendChild(note);
         card.appendChild(info);
