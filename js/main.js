@@ -59,6 +59,12 @@
     smokeCount: 0,
     beerCount: 0,
     reactionActive: false,
+    // FRIENDBOOK (mockup) — sample entries; photo may be a data URI or null (pixel avatar)
+    fbEntries: [
+      { photo: 'DESK_PHOTO', name: 'Sam', color: 'beer gold', learn: 'do a proper kickflip', note: "my room, my rules. sign here and maybe I'll like you.", av: null },
+      { photo: null, name: 'Lena', color: 'lilac', learn: 'make techno', note: 'greetings from zurich. nice room sam, but open a window sometime...', av: ['#b48ae0', '#2c2438'] },
+      { photo: null, name: 'Kev', color: 'green', learn: '3D modelling', note: 'the ashtray is a vibe. 10/10 would visit again', av: ['#7ec27e', '#1e2c1e'] },
+    ],
     // desktop intro quiz (Win95 error-dialog style); must be completed to use the desktop
     quizTree: {
       q1: { msg: 'Are you friends with sam?', buttons: [{ label: 'Yes', go: 'yes' }, { label: 'No', go: 'no' }] },
@@ -759,7 +765,7 @@
       var glow = new T.PointLight(0x7bd8ff, 0.5, 3.4); glow.position.copy(this.SCREEN_CTR).add(new T.Vector3(0, 0, 0.32)); scene.add(glow);
 
       // desktop icons (Win95): draw pixel-art icons and wire clicks
-      var iconTypeFor = function (app) { return app === 'notepad' ? 'notepad' : app === 'recycle' ? 'recycle' : 'folder'; };
+      var iconTypeFor = function (app) { return app === 'notepad' ? 'notepad' : app === 'recycle' ? 'recycle' : app === 'friendbook' ? 'book' : 'folder'; };
       Array.prototype.forEach.call(els.desktop.querySelectorAll('.dicon'), function (ic) {
         var app = ic.getAttribute('data-app');
         self.drawIcon(ic.querySelector('canvas'), iconTypeFor(app));
@@ -1149,6 +1155,20 @@
         g.fillStyle = '#1f8a2a';
         g.beginPath(); g.moveTo(13, 17); g.lineTo(16, 15); g.lineTo(16, 19); g.closePath(); g.fill();
         g.beginPath(); g.moveTo(19, 21); g.lineTo(16, 23); g.lineTo(16, 19); g.closePath(); g.fill();
+      } else if (type === 'book') {
+        g.fillStyle = 'rgba(0,0,0,.30)'; g.fillRect(7, 27, 20, 2);
+        g.fillStyle = '#fdfdf6'; g.fillRect(23, 7, 3, 20);
+        g.strokeStyle = '#000'; g.lineWidth = 1; g.strokeRect(23.5, 7.5, 2, 19);
+        g.fillStyle = '#8a2430'; g.fillRect(5, 5, 19, 22);
+        g.fillStyle = '#a63340'; g.fillRect(7, 5, 17, 22);
+        g.strokeStyle = '#000'; g.strokeRect(5.5, 5.5, 18.5, 21);
+        g.fillStyle = '#e8dfc8'; g.fillRect(10, 9, 11, 9);
+        g.strokeStyle = '#000'; g.strokeRect(10.5, 9.5, 10, 8);
+        g.fillStyle = '#3a3a3a';
+        g.fillRect(12, 12, 2, 2); g.fillRect(17, 12, 2, 2);
+        g.fillRect(13, 15, 5, 1);
+        g.fillStyle = '#e0c869'; g.fillRect(10, 20, 11, 2);
+        g.fillStyle = '#e0c869'; g.fillRect(10, 23.5, 8, 1.5);
       } else if (type === 'cd') {
         g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(16, 28, 11, 2.5, 0, 0, 7); g.fill();
         g.fillStyle = '#dfe2e6'; g.beginPath(); g.arc(16, 15, 12, 0, 7); g.fill();
@@ -1297,6 +1317,111 @@
     },
 
     /* ---------- Win95 windows ---------- */
+    fbAvatar: function (colors, name) {
+      var c = document.createElement('canvas'); c.width = 64; c.height = 64;
+      var g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+      g.fillStyle = colors[1]; g.fillRect(0, 0, 64, 64);
+      g.fillStyle = colors[0]; g.fillRect(14, 12, 36, 40);
+      g.fillStyle = colors[1];
+      g.fillRect(22, 26, 6, 6); g.fillRect(36, 26, 6, 6);
+      g.fillRect(24, 40, 16, 4);
+      g.fillStyle = colors[0]; g.fillRect(8, 52, 48, 12);
+      return c.toDataURL();
+    },
+    renderFriendbook: function (bodyEl) {
+      var self = this;
+      var list = bodyEl.querySelector('.fb-list');
+      var cnt = bodyEl.querySelector('.fb-count-label');
+      if (!list) return;
+      list.innerHTML = '';
+      this.fbEntries.forEach(function (e) {
+        var card = document.createElement('div'); card.className = 'fb-card' + (e.pending ? ' fb-pending' : '');
+        var img = document.createElement('img'); img.className = 'fb-photo';
+        img.src = e.photo === 'DESK_PHOTO' ? (window.DESK_PHOTO || '') : (e.photo || self.fbAvatar(e.av || ['#999', '#333'], e.name));
+        card.appendChild(img);
+        var info = document.createElement('div'); info.className = 'fb-info';
+        var nm = document.createElement('div'); nm.className = 'fb-name'; nm.textContent = e.name;
+        if (e.pending) { var pb = document.createElement('span'); pb.className = 'fb-badge'; pb.textContent = 'pending'; nm.appendChild(pb); }
+        info.appendChild(nm);
+        var mk = function (label, val, swatch) {
+          var row = document.createElement('div'); row.className = 'fb-row';
+          var lab = document.createElement('span'); lab.className = 'fb-rowlabel'; lab.textContent = label + ' ';
+          row.appendChild(lab);
+          if (swatch) {
+            var sw = document.createElement('span'); sw.className = 'fb-swatch';
+            try { sw.style.background = val; } catch (_) {}
+            row.appendChild(sw);
+          }
+          row.appendChild(document.createTextNode(val));
+          info.appendChild(row);
+        };
+        mk('fav color:', e.color, true);
+        mk('wants to learn:', e.learn, false);
+        var note = document.createElement('div'); note.className = 'fb-note'; note.textContent = '\u201c' + e.note + '\u201d';
+        info.appendChild(note);
+        card.appendChild(info);
+        list.appendChild(card);
+      });
+      if (cnt) cnt.textContent = this.fbEntries.length + ' friend(s) signed';
+      var btn = bodyEl.querySelector('.fb-signbtn');
+      if (btn && !btn._wired) { btn._wired = true; btn.addEventListener('click', function () { self.click(); self.openWindow('friendsign'); }); }
+    },
+    setupFriendSign: function (bodyEl, st) {
+      var self = this;
+      var photoBox = bodyEl.querySelector('.fb-photobox');
+      var photoBtn = bodyEl.querySelector('.fb-photobtn');
+      var photoIn = bodyEl.querySelector('.fb-photoinput');
+      var noteIn = bodyEl.querySelector('.fb-note-in');
+      var countEl = bodyEl.querySelector('.fb-wordcount');
+      var photoData = null;
+      photoBtn.addEventListener('click', function () { self.click(); photoIn.click(); });
+      photoIn.addEventListener('change', function () {
+        var f = photoIn.files && photoIn.files[0]; if (!f) return;
+        var rd = new FileReader();
+        rd.onload = function () {
+          var im = new Image();
+          im.onload = function () {
+            var c = document.createElement('canvas'); var S = 128;
+            c.width = S; c.height = S;
+            var g = c.getContext('2d');
+            var m = Math.min(im.width, im.height);
+            g.drawImage(im, (im.width - m) / 2, (im.height - m) / 2, m, m, 0, 0, S, S);
+            photoData = c.toDataURL('image/jpeg', 0.85);
+            photoBox.innerHTML = '';
+            var pv = document.createElement('img'); pv.src = photoData; photoBox.appendChild(pv);
+          };
+          im.src = rd.result;
+        };
+        rd.readAsDataURL(f);
+      });
+      var words = function (t) { return t.split(/\s+/).filter(Boolean); };
+      noteIn.addEventListener('input', function () {
+        var w = words(noteIn.value);
+        if (w.length > 200) { noteIn.value = w.slice(0, 200).join(' '); w = words(noteIn.value); }
+        countEl.textContent = w.length + ' / 200 words';
+      });
+      bodyEl.querySelector('.fb-submit').addEventListener('click', function () {
+        var name = bodyEl.querySelector('.fb-name-in').value.trim();
+        if (!name) { bodyEl.querySelector('.fb-name-in').focus(); self.blip(300, 0.1); return; }
+        self.beep();
+        self.fbEntries.push({
+          photo: photoData, av: ['#c9b458', '#2e2a20'],
+          name: name,
+          color: bodyEl.querySelector('.fb-color-in').value.trim() || '?',
+          learn: bodyEl.querySelector('.fb-learn-in').value.trim() || '?',
+          note: noteIn.value.trim() || '...',
+          pending: true,
+        });
+        if (st && st.tab) st.tab.remove();
+        st.win.remove();
+        Array.prototype.forEach.call(els.windows.querySelectorAll('.win'), function () {});
+        var books = els.windows.querySelectorAll('.fb-list');
+        for (var i = 0; i < books.length; i++) {
+          var inset = books[i].closest('.win-body');
+          if (inset) self.renderFriendbook(inset);
+        }
+      });
+    },
     loadGallery: function (bodyEl) {
       var self = this;
       var grid = bodyEl.querySelector('.gal-grid');
@@ -1389,6 +1514,22 @@
         return { title: 'Bangers', icon: 'cd', width: 340,
           body: menu + '<div class="win-inset"><b>BANGERS.M3U</b><br>&gt; 01 &mdash; track one<br>&gt; 02 &mdash; track two<br>&gt; 03 &mdash; track three<br><br>[ PLACEHOLDER &mdash; add your tracks ]</div>' };
       }
+      if (kind === 'friendbook') {
+        return { title: 'Friendbook', icon: 'book', width: 480, height: 380,
+          body: menu + '<div class="win-inset fb-inset"><div class="fb-toolbar"><button type="button" class="fb-signbtn">&#9997; Sign the book</button><span class="fb-count-label"></span></div><div class="fb-list"></div></div><div class="win-status"><span>MOCKUP &mdash; entries are not saved yet</span></div>' };
+      }
+      if (kind === 'friendsign') {
+        return { title: 'Sign the Friendbook', icon: 'book', width: 330,
+          body: '<div class="win-inset fb-form">' +
+            '<div class="fb-photorow"><div class="fb-photobox"><span>no<br>photo</span></div><button type="button" class="fb-photobtn">Choose photo&hellip;</button><input type="file" accept="image/*" class="fb-photoinput" style="display:none"></div>' +
+            '<label class="fb-label">Name</label><input type="text" class="fb-input fb-name-in" maxlength="24">' +
+            '<label class="fb-label">My favorite color is&hellip;</label><input type="text" class="fb-input fb-color-in" maxlength="24">' +
+            '<label class="fb-label">I want to learn how to&hellip;.</label><input type="text" class="fb-input fb-learn-in" maxlength="60">' +
+            '<label class="fb-label">Leave a note:</label><textarea class="fb-textarea fb-note-in" rows="4"></textarea>' +
+            '<div class="fb-wordcount">0 / 200 words</div>' +
+            '<button type="button" class="fb-submit">Submit</button>' +
+          '</div>' };
+      }
       if (kind === 'notepad') {
         return { title: 'Untitled - Notepad', icon: 'notepad', width: 360,
           body: '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>S</u>earch</span><span><u>H</u>elp</span></div><div class="np-area"><span class="np-caret">|</span></div>' };
@@ -1452,6 +1593,8 @@
       win.addEventListener('pointerdown', function () { self.focusWindow(win); });
 
       if (kind === 'images') self.loadGallery(body);
+      if (kind === 'friendbook') self.renderFriendbook(body);
+      if (kind === 'friendsign') self.setupFriendSign(body, st);
 
       bClose.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); if (st.tab) st.tab.remove(); win.remove(); });
       bMin.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); self.minimizeWindow(st); });

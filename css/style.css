@@ -679,3 +679,88 @@ canvas#scene {
     inset 2px 2px 0 #808080, inset -2px -2px 0 #dfdfdf;
 }
 .dlg-btn:focus { outline: 1px dotted #000; outline-offset: -4px; }
+
+/* ---- FRIENDBOOK ---- */
+.fb-inset { padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+.fb-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #c8c8c8;
+}
+.fb-signbtn, .fb-submit, .fb-photobtn {
+  font-family: inherit;
+  font-size: 12px;
+  background: #c0c0c0;
+  border: 2px outset #fff;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.fb-signbtn:active, .fb-submit:active, .fb-photobtn:active { border-style: inset; }
+.fb-count-label { font-size: 11px; color: #555; }
+.fb-list { display: flex; flex-direction: column; gap: 6px; overflow: auto; }
+.fb-card {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  background: #efefe6;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff;
+}
+.fb-card.fb-pending { opacity: 0.75; }
+.fb-photo {
+  width: 56px; height: 56px;
+  object-fit: cover;
+  flex: none;
+  image-rendering: pixelated;
+  border: 1px solid #000;
+  background: #ddd;
+}
+.fb-info { min-width: 0; }
+.fb-name { font-weight: bold; font-size: 13px; margin-bottom: 2px; }
+.fb-badge {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: normal;
+  background: #e0c869;
+  border: 1px solid #8a7420;
+  padding: 0 4px;
+}
+.fb-row { font-size: 11px; color: #333; }
+.fb-rowlabel { color: #777; }
+.fb-swatch {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border: 1px solid #000;
+  margin-right: 3px;
+  background: #bbb;
+  vertical-align: middle;
+}
+.fb-note { font-size: 11px; font-style: italic; color: #222; margin-top: 3px; word-wrap: break-word; }
+
+.fb-form { display: flex; flex-direction: column; gap: 3px; }
+.fb-label { font-size: 11px; color: #333; margin-top: 5px; }
+.fb-input, .fb-textarea {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 2px 4px;
+  background: #fff;
+  border: none;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff, inset 2px 2px 0 #000, inset -2px -2px 0 #dfdfdf;
+}
+.fb-textarea { resize: vertical; min-height: 56px; }
+.fb-wordcount { font-size: 10px; color: #777; text-align: right; }
+.fb-photorow { display: flex; align-items: center; gap: 8px; }
+.fb-photobox {
+  width: 56px; height: 56px;
+  flex: none;
+  background: #ddd;
+  border: 1px solid #000;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #888; text-align: center;
+  overflow: hidden;
+}
+.fb-photobox img { width: 100%; height: 100%; object-fit: cover; }
+.fb-submit { margin-top: 8px; align-self: flex-end; }
