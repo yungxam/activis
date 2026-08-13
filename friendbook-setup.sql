@@ -13,7 +13,7 @@ create table public.friendbook (
     photo_url is null or
     photo_url like 'https://waodcyzcofiwydaylxse.supabase.co/storage/v1/object/public/friendbook-photos/%'
   ),
-  approved boolean not null default false
+  approved boolean not null default true
 );
 
 -- 2) row security: anyone may read APPROVED entries and add PENDING ones;
@@ -24,9 +24,19 @@ create policy "read approved entries"
   on public.friendbook for select
   using (approved = true);
 
-create policy "sign the book (pending)"
+create policy "sign the book"
   on public.friendbook for insert
-  with check (approved = false);
+  with check (true);
+
+-- ---------------------------------------------------------------
+-- LATER: to switch to approval-first mode (entries hidden until you
+-- tick 'approved' in the Table Editor), run these three lines:
+--
+--   alter table public.friendbook alter column approved set default false;
+--   drop policy "sign the book" on public.friendbook;
+--   create policy "sign the book" on public.friendbook
+--     for insert with check (approved = false);
+-- ---------------------------------------------------------------
 
 -- 3) photo storage bucket (public read, 500 KB max per file, images only)
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

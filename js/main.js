@@ -1398,7 +1398,7 @@
       if (cnt) cnt.textContent = entries.length + ' friend(s) signed';
       if (status) status.textContent = offline
         ? 'offline preview \u2014 showing sample entries'
-        : 'new entries appear once Sam approves them \u270c';
+        : 'sign it and you\u2019re in \u270c';
       var btn = bodyEl.querySelector('.fb-signbtn');
       if (btn && !btn._wired) { btn._wired = true; btn.addEventListener('click', function () { self.click(); self.openWindow('friendsign'); }); }
     },
@@ -1477,13 +1477,18 @@
           self.beep();
           var inset = bodyEl.querySelector('.fb-form');
           inset.innerHTML = '<div class="fb-success"><b>Thanks, ' + name.replace(/[<>&]/g, '') + '! \u270c</b>' +
-            '<span>your entry is in sam\u2019s inbox \u2014 it shows up in the book once he approves it.</span>' +
+            '<span>you\u2019re in the book.</span>' +
             '<button type="button" class="fb-okbtn">OK</button></div>';
           inset.querySelector('.fb-okbtn').addEventListener('click', function () {
             self.click();
             if (st.tab) st.tab.remove();
             st.win.remove();
           });
+          var books = els.windows.querySelectorAll('.fb-list');
+          for (var bi = 0; bi < books.length; bi++) {
+            var wb = books[bi].closest('.win-body');
+            if (wb) self.renderFriendbook(wb);
+          }
         }).catch(fail);
       });
     },
