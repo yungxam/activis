@@ -1,0 +1,20 @@
+name: Keep Friendbook awake
+
+# Supabase free projects pause after 1 week without API activity.
+# One tiny read per day keeps the Friendbook always on.
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Friendbook
+        run: |
+          curl -sf -o /dev/null \
+            "https://waodcyzcofiwydaylxse.supabase.co/rest/v1/friendbook?select=id&limit=1" \
+            -H "apikey: sb_publishable_DepJKE92L3GdLzwYUCnGDQ_0Fq9JGZT" \
+            -H "Authorization: Bearer sb_publishable_DepJKE92L3GdLzwYUCnGDQ_0Fq9JGZT"
+          echo "friendbook is awake"

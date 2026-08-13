@@ -6,6 +6,14 @@
   var ENABLE_JITTER = false;  // PS1 vertex wobble, off for the realistic look
   var START_MUTED = true;     // site starts muted; user opts in via the SOUND button
 
+  var FB_API = 'https://waodcyzcofiwydaylxse.supabase.co';
+  var FB_KEY = 'sb_publishable_DepJKE92L3GdLzwYUCnGDQ_0Fq9JGZT';
+  var fbHeaders = function (extra) {
+    var h = { apikey: FB_KEY, Authorization: 'Bearer ' + FB_KEY };
+    if (extra) for (var k in extra) h[k] = extra[k];
+    return h;
+  };
+
   var els = {
     stage: document.getElementById('stage'),
     canvas: document.getElementById('scene'),
@@ -1331,13 +1339,37 @@
     renderFriendbook: function (bodyEl) {
       var self = this;
       var list = bodyEl.querySelector('.fb-list');
+      if (!list) return;
+      list.innerHTML = '<div class="fb-loading">loading the book&hellip;</div>';
+      fetch(FB_API + '/rest/v1/friendbook?select=name,color,learn,note,photo_url&approved=eq.true&order=created_at.asc', { headers: fbHeaders() })
+        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+        .then(function (rows) {
+          var entries = rows.map(function (r) {
+            return { photo: r.photo_url || null, name: r.name, color: r.color || '?', learn: r.learn || '?', note: r.note || '...' };
+          });
+          self._fbRender(bodyEl, entries, false);
+        })
+        .catch(function () { self._fbRender(bodyEl, self.fbEntries, true); });
+    },
+    _fbAvColors: ['#b48ae0,#2c2438', '#7ec27e,#1e2c1e', '#e0a460,#382a1e', '#6fb6d8,#1c2a34', '#e08a9c,#341e26'],
+    _fbRender: function (bodyEl, entries, offline) {
+      var self = this;
+      var list = bodyEl.querySelector('.fb-list');
       var cnt = bodyEl.querySelector('.fb-count-label');
+      var status = bodyEl.querySelector('.fb-status');
       if (!list) return;
       list.innerHTML = '';
-      this.fbEntries.forEach(function (e) {
+      entries.forEach(function (e) {
         var card = document.createElement('div'); card.className = 'fb-card' + (e.pending ? ' fb-pending' : '');
-        var img = document.createElement('img'); img.className = 'fb-photo';
-        img.src = e.photo === 'DESK_PHOTO' ? (window.DESK_PHOTO || '') : (e.photo || self.fbAvatar(e.av || ['#999', '#333'], e.name));
+        var img = document.createElement('img'); img.className = 'fb-photo'; img.loading = 'lazy';
+        var photo = e.photo === 'DESK_PHOTO' ? (window.DESK_PHOTO || '') : e.photo;
+        if (!photo && e.name === 'Sam') photo = window.DESK_PHOTO || '';
+        if (!photo) {
+          var hash = 0; for (var ci = 0; ci < e.name.length; ci++) hash = (hash * 31 + e.name.charCodeAt(ci)) | 0;
+          var pal = (e.av && e.av.join(',')) || self._fbAvColors[Math.abs(hash) % self._fbAvColors.length];
+          photo = self.fbAvatar(pal.split(','), e.name);
+        }
+        img.src = photo;
         card.appendChild(img);
         var info = document.createElement('div'); info.className = 'fb-info';
         var nm = document.createElement('div'); nm.className = 'fb-name'; nm.textContent = e.name;
@@ -1362,7 +1394,11 @@
         card.appendChild(info);
         list.appendChild(card);
       });
-      if (cnt) cnt.textContent = this.fbEntries.length + ' friend(s) signed';
+      if (!entries.length) list.innerHTML = '<div class="fb-loading">nobody signed yet &mdash; be the first!</div>';
+      if (cnt) cnt.textContent = entries.length + ' friend(s) signed';
+      if (status) status.textContent = offline
+        ? 'offline preview \u2014 showing sample entries'
+        : 'new entries appear once Sam approves them \u270c';
       var btn = bodyEl.querySelector('.fb-signbtn');
       if (btn && !btn._wired) { btn._wired = true; btn.addEventListener('click', function () { self.click(); self.openWindow('friendsign'); }); }
     },
@@ -1381,7 +1417,7 @@
         rd.onload = function () {
           var im = new Image();
           im.onload = function () {
-            var c = document.createElement('canvas'); var S = 128;
+            var c = document.createElement('canvas'); var S = 256;
             c.width = S; c.height = S;
             var g = c.getContext('2d');
             var m = Math.min(im.width, im.height);
@@ -1400,26 +1436,55 @@
         if (w.length > 200) { noteIn.value = w.slice(0, 200).join(' '); w = words(noteIn.value); }
         countEl.textContent = w.length + ' / 200 words';
       });
-      bodyEl.querySelector('.fb-submit').addEventListener('click', function () {
+      var submitBtn = bodyEl.querySelector('.fb-submit');
+      submitBtn.addEventListener('click', function () {
         var name = bodyEl.querySelector('.fb-name-in').value.trim();
         if (!name) { bodyEl.querySelector('.fb-name-in').focus(); self.blip(300, 0.1); return; }
+        if (submitBtn._busy) return;
+        submitBtn._busy = true; submitBtn.textContent = 'Sending\u2026';
         self.beep();
-        self.fbEntries.push({
-          photo: photoData, av: ['#c9b458', '#2e2a20'],
-          name: name,
-          color: bodyEl.querySelector('.fb-color-in').value.trim() || '?',
-          learn: bodyEl.querySelector('.fb-learn-in').value.trim() || '?',
-          note: noteIn.value.trim() || '...',
-          pending: true,
-        });
-        if (st && st.tab) st.tab.remove();
-        st.win.remove();
-        Array.prototype.forEach.call(els.windows.querySelectorAll('.win'), function () {});
-        var books = els.windows.querySelectorAll('.fb-list');
-        for (var i = 0; i < books.length; i++) {
-          var inset = books[i].closest('.win-body');
-          if (inset) self.renderFriendbook(inset);
-        }
+        var color = bodyEl.querySelector('.fb-color-in').value.trim();
+        var learn = bodyEl.querySelector('.fb-learn-in').value.trim();
+        var note = noteIn.value.trim();
+        var fail = function () {
+          submitBtn._busy = false; submitBtn.textContent = 'Submit';
+          var err = bodyEl.querySelector('.fb-error');
+          if (!err) { err = document.createElement('div'); err.className = 'fb-error'; submitBtn.parentNode.insertBefore(err, submitBtn); }
+          err.textContent = "couldn't reach the book \u2014 try again in a minute";
+          self.blip(300, 0.1);
+        };
+        var uploadPhoto = photoData
+          ? fetch(photoData).then(function (r) { return r.blob(); }).then(function (blob) {
+              var fname = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+              return fetch(FB_API + '/storage/v1/object/friendbook-photos/' + fname, {
+                method: 'POST',
+                headers: fbHeaders({ 'Content-Type': 'image/jpeg' }),
+                body: blob,
+              }).then(function (r) {
+                if (!r.ok) throw new Error('upload ' + r.status);
+                return FB_API + '/storage/v1/object/public/friendbook-photos/' + fname;
+              });
+            })
+          : Promise.resolve(null);
+        uploadPhoto.then(function (photoUrl) {
+          return fetch(FB_API + '/rest/v1/friendbook', {
+            method: 'POST',
+            headers: fbHeaders({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
+            body: JSON.stringify({ name: name, color: color || null, learn: learn || null, note: note || null, photo_url: photoUrl }),
+          });
+        }).then(function (r) {
+          if (!r.ok) throw new Error('insert ' + r.status);
+          self.beep();
+          var inset = bodyEl.querySelector('.fb-form');
+          inset.innerHTML = '<div class="fb-success"><b>Thanks, ' + name.replace(/[<>&]/g, '') + '! \u270c</b>' +
+            '<span>your entry is in sam\u2019s inbox \u2014 it shows up in the book once he approves it.</span>' +
+            '<button type="button" class="fb-okbtn">OK</button></div>';
+          inset.querySelector('.fb-okbtn').addEventListener('click', function () {
+            self.click();
+            if (st.tab) st.tab.remove();
+            st.win.remove();
+          });
+        }).catch(fail);
       });
     },
     loadGallery: function (bodyEl) {
@@ -1516,7 +1581,7 @@
       }
       if (kind === 'friendbook') {
         return { title: 'Friendbook', icon: 'book', width: 480, height: 380,
-          body: menu + '<div class="win-inset fb-inset"><div class="fb-toolbar"><button type="button" class="fb-signbtn">&#9997; Sign the book</button><span class="fb-count-label"></span></div><div class="fb-list"></div></div><div class="win-status"><span>MOCKUP &mdash; entries are not saved yet</span></div>' };
+          body: menu + '<div class="win-inset fb-inset"><div class="fb-toolbar"><button type="button" class="fb-signbtn">&#9997; Sign the book</button><span class="fb-count-label"></span></div><div class="fb-list"></div></div><div class="win-status"><span class="fb-status">loading&hellip;</span></div>' };
       }
       if (kind === 'friendsign') {
         return { title: 'Sign the Friendbook', icon: 'book', width: 330,
