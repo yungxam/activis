@@ -1524,7 +1524,7 @@
             '<div class="fb-photorow"><div class="fb-photobox"><span>no<br>photo</span></div><button type="button" class="fb-photobtn">Choose photo&hellip;</button><input type="file" accept="image/*" class="fb-photoinput" style="display:none"></div>' +
             '<label class="fb-label">Name</label><input type="text" class="fb-input fb-name-in" maxlength="24">' +
             '<label class="fb-label">My favorite color is...</label><input type="text" class="fb-input fb-color-in" maxlength="24">' +
-            '<label class="fb-label">I want to learn how to....</label><input type="text" class="fb-input fb-learn-in" maxlength="60">' +
+            '<label class="fb-label">I want to learn how to...</label><input type="text" class="fb-input fb-learn-in" maxlength="60">' +
             '<label class="fb-label">Leave a note:</label><textarea class="fb-textarea fb-note-in" rows="4"></textarea>' +
             '<div class="fb-wordcount">0 / 200 words</div>' +
             '<button type="button" class="fb-submit">Submit</button>' +
