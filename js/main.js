@@ -487,13 +487,14 @@
       add(B(14, 7, 0.3), wallM, 0, 2.6, -1.85);
       add(B(0.3, 7, 12), wallM, 3.2, 2.6, -0.6);
       add(B(3.7, 0.16, 1.65), deskM, 0, 0.69, -0.35);
-      // table legs: two X-shaped black metal trestles, inset from the edges
-      var legM = PH({ color: 0x1c1c20, specular: 0x36363c, shininess: 26 });
+      // table legs: two X-shaped wooden trestles at the ends, inset from the
+      // edges; each X spans the desk's depth (front foot to back foot)
+      var legM = PH({ color: 0x38220f, specular: 0x140d06, shininess: 8 });
       [-1.25, 1.25].forEach(function (lx) {
-        [0.34, -0.34].forEach(function (tilt) {
-          var bar = new T.Mesh(B(0.13, 1.0, 0.09), legM);
+        [0.78, -0.78].forEach(function (tilt) {
+          var bar = new T.Mesh(B(0.14, 1.28, 0.1), legM);
           bar.position.set(lx, 0.155, -0.35);
-          bar.rotation.z = tilt;
+          bar.rotation.x = tilt;
           bar.castShadow = true; bar.receiveShadow = true;
           scene.add(bar);
         });
