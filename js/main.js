@@ -487,10 +487,17 @@
       add(B(14, 7, 0.3), wallM, 0, 2.6, -1.85);
       add(B(0.3, 7, 12), wallM, 3.2, 2.6, -0.6);
       add(B(3.7, 0.16, 1.65), deskM, 0, 0.69, -0.35);
-      // table legs: two solid side panels from the floor to the desk underside
-      var legM = PH({ color: 0x6b6862, specular: 0x1a1a18, shininess: 8 });
-      add(B(0.14, 0.91, 1.45), legM, -1.66, 0.155, -0.35);
-      add(B(0.14, 0.91, 1.45), legM, 1.66, 0.155, -0.35);
+      // table legs: two X-shaped black metal trestles, inset from the edges
+      var legM = PH({ color: 0x1c1c20, specular: 0x36363c, shininess: 26 });
+      [-1.25, 1.25].forEach(function (lx) {
+        [0.34, -0.34].forEach(function (tilt) {
+          var bar = new T.Mesh(B(0.13, 1.0, 0.09), legM);
+          bar.position.set(lx, 0.155, -0.35);
+          bar.rotation.z = tilt;
+          bar.castShadow = true; bar.receiveShadow = true;
+          scene.add(bar);
+        });
+      });
       var DESK_TOP = 0.77;
 
       // MONITOR (angled group; front = +z)
