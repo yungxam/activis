@@ -1504,6 +1504,68 @@
         }).catch(fail);
       });
     },
+    binSamples: ['people walking on bike lanes', 'tomatoes'],
+    loadBin: function (bodyEl) {
+      var self = this;
+      var list = bodyEl.querySelector('.bin-list');
+      var status = bodyEl.querySelector('.bin-status');
+      if (!list) return;
+      fetch(FB_API + '/rest/v1/bin_items?select=text&approved=eq.true&order=created_at.asc', { headers: fbHeaders() })
+        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+        .then(function (rows) {
+          self._binRender(bodyEl, rows.map(function (r) { return r.text; }), false);
+        })
+        .catch(function () { self._binRender(bodyEl, self.binSamples, true); });
+    },
+    _binRender: function (bodyEl, items, offline) {
+      var list = bodyEl.querySelector('.bin-list');
+      var status = bodyEl.querySelector('.bin-status');
+      if (!list) return;
+      list.innerHTML = '';
+      items.forEach(function (t) {
+        var row = document.createElement('div'); row.className = 'bin-item';
+        row.textContent = '> ' + t;
+        list.appendChild(row);
+      });
+      if (!items.length) list.innerHTML = '<div class="bin-item bin-dim">nothing is trash yet...</div>';
+      if (status) status.textContent = offline
+        ? 'offline preview \u2014 sample takes'
+        : items.length + ' thing(s) declared trash';
+    },
+    setupBin: function (bodyEl) {
+      var self = this;
+      this.loadBin(bodyEl);
+      var input = bodyEl.querySelector('.bin-in');
+      var btn = bodyEl.querySelector('.bin-add');
+      var submit = function () {
+        var t = input.value.trim();
+        if (!t) { input.focus(); self.blip(300, 0.1); return; }
+        if (btn._busy) return;
+        btn._busy = true; btn.textContent = '\u2026';
+        fetch(FB_API + '/rest/v1/bin_items', {
+          method: 'POST',
+          headers: fbHeaders({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
+          body: JSON.stringify({ text: t }),
+        }).then(function (r) {
+          if (!r.ok) throw new Error('insert ' + r.status);
+          btn._busy = false; btn.textContent = 'Add';
+          input.value = '';
+          self.beep();
+          var bins = els.windows.querySelectorAll('.bin-list');
+          for (var i = 0; i < bins.length; i++) {
+            var wb = bins[i].closest('.win-body');
+            if (wb) self.loadBin(wb);
+          }
+        }).catch(function () {
+          btn._busy = false; btn.textContent = 'Add';
+          self.blip(300, 0.1);
+          var status = bodyEl.querySelector('.bin-status');
+          if (status) status.textContent = "couldn't reach the bin \u2014 try again later";
+        });
+      };
+      btn.addEventListener('click', function () { self.click(); submit(); });
+      input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+    },
     loadGallery: function (bodyEl) {
       var self = this;
       var grid = bodyEl.querySelector('.gal-grid');
@@ -1616,9 +1678,11 @@
         return { title: 'Untitled - Notepad', icon: 'notepad', width: 360,
           body: '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>S</u>earch</span><span><u>H</u>elp</span></div><div class="np-area"><span class="np-caret">|</span></div>' };
       }
-      // recycle
-      return { title: 'Recycle Bin', icon: 'recycle', width: 340,
-        body: menu + '<div class="win-inset win-empty"><b>The Recycle Bin is empty.</b><span>[ PLACEHOLDER ]</span></div>' };
+      // recycle -> the bin: a community list of things that are trash
+      return { title: 'bin', icon: 'recycle', width: 360, height: 340,
+        body: menu + '<div class="win-inset bin-inset"><div class="bin-head">WHAT IS TRASH:</div><div class="bin-list">loading&hellip;</div></div>' +
+          '<div class="bin-addrow"><input type="text" class="bin-in" maxlength="80" placeholder="add something trash..."><button type="button" class="bin-add">Add</button></div>' +
+          '<div class="win-status"><span class="bin-status"></span></div>' };
     },
     focusWindow: function (win) {
       var list = els.windows.querySelectorAll('.win');
@@ -1677,6 +1741,7 @@
       if (kind === 'images') self.loadGallery(body);
       if (kind === 'friendbook') self.renderFriendbook(body);
       if (kind === 'friendsign') self.setupFriendSign(body, st);
+      if (kind === 'recycle') self.setupBin(body);
 
       bClose.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); if (st.tab) st.tab.remove(); win.remove(); });
       bMin.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); self.minimizeWindow(st); });

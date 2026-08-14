@@ -778,3 +778,22 @@ canvas#scene {
   border: 2px outset #fff; padding: 3px 18px; cursor: pointer; margin-top: 6px;
 }
 .fb-okbtn:active { border-style: inset; }
+
+/* ---- BIN (what is trash) ---- */
+.bin-inset { display: flex; flex-direction: column; gap: 4px; }
+.bin-head { font-weight: bold; font-size: 12px; border-bottom: 1px solid #c8c8c8; padding-bottom: 3px; }
+.bin-list { flex: 1; overflow: auto; }
+.bin-item { font-size: 12px; padding: 2px 0; border-bottom: 1px dotted #e2e2e2; word-wrap: break-word; }
+.bin-dim { color: #888; }
+.bin-addrow { flex: none; display: flex; gap: 4px; margin-top: 3px; }
+.bin-in {
+  flex: 1;
+  font-family: inherit; font-size: 12px; padding: 2px 4px;
+  background: #fff; border: none;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff, inset 2px 2px 0 #000, inset -2px -2px 0 #dfdfdf;
+}
+.bin-add {
+  font-family: inherit; font-size: 12px; background: #c0c0c0;
+  border: 2px outset #fff; padding: 2px 12px; cursor: pointer;
+}
+.bin-add:active { border-style: inset; }
