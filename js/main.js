@@ -1680,7 +1680,7 @@
       }
       // recycle -> the bin: a community list of things that are trash
       return { title: 'bin', icon: 'recycle', width: 360, height: 340,
-        body: menu + '<div class="win-inset bin-inset"><div class="bin-head">WHAT IS TRASH:</div><div class="bin-list">loading&hellip;</div></div>' +
+        body: menu + '<div class="win-inset bin-inset"><div class="bin-head">TRASH:</div><div class="bin-list">loading&hellip;</div></div>' +
           '<div class="bin-addrow"><input type="text" class="bin-in" maxlength="80" placeholder="add something trash..."><button type="button" class="bin-add">Add</button></div>' +
           '<div class="win-status"><span class="bin-status"></span></div>' };
     },
