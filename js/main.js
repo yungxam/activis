@@ -816,7 +816,7 @@
         var r = stage.getBoundingClientRect();
         self.mx = ((e.clientX - r.left) / r.width) * 2 - 1;
         self.my = -(((e.clientY - r.top) / r.height) * 2 - 1);
-        if (self.view === 'desk' && !self.tween) {
+        if (self.view === 'desk' && !self.tween && !self.introActive && !self.reactionActive) {
           self.ray.setFromCamera(new T.Vector2(self.mx, self.my), cam);
           var hCig = !self.smoking && self.ray.intersectObjects(self.cigTargets, false).length;
           var hBeer = !self.drinking && self.ray.intersectObjects(self.beerTargets, false).length;
@@ -832,7 +832,7 @@
       });
       stage.addEventListener('pointerdown', function () {
         self.initAudio();
-        if (self.introActive) return;
+        if (self.introActive || self.reactionActive) return;
         if (self.view === 'desk' && !self.tween) {
           self.ray.setFromCamera(new T.Vector2(self.mx, self.my), cam);
           if (self.ray.intersectObjects(self.clickTargets, false).length) { self.flyIn(); return; }
