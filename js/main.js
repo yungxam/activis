@@ -773,6 +773,24 @@
       this.clickTargets = [screen, bez];
       this.cigTargets = [packBody, packLid];
 
+      // subtle "clickable" affordance: each interactive object gets a gentle
+      // emissive breathing pulse, held slightly stronger while hovered
+      var glowMats = function (meshes) {
+        var out = [];
+        meshes.forEach(function (m) {
+          var mats = Array.isArray(m.material) ? m.material : [m.material];
+          mats.forEach(function (mt) { if (mt && mt.emissive && out.indexOf(mt) === -1) out.push(mt); });
+        });
+        return out;
+      };
+      this.glowSets = [
+        { mats: glowMats(this.cigTargets), phase: 0.0, hot: false },
+        { mats: glowMats(this.beerTargets), phase: 1.6, hot: false },
+        { mats: glowMats(this.usbTargets), phase: 3.2, hot: false },
+        { mats: glowMats(this.cdTargets), phase: 4.8, hot: false },
+      ];
+      this.glowT = 0;
+
       // lights
       scene.add(new T.AmbientLight(0x46443e, 0.5));
       scene.add(new T.HemisphereLight(0xbab29c, 0x2a2722, 0.7));
@@ -800,11 +818,15 @@
         self.my = -(((e.clientY - r.top) / r.height) * 2 - 1);
         if (self.view === 'desk' && !self.tween) {
           self.ray.setFromCamera(new T.Vector2(self.mx, self.my), cam);
-          var hit = self.ray.intersectObjects(self.clickTargets, false).length ||
-            (!self.smoking && self.ray.intersectObjects(self.cigTargets, false).length) ||
-            (!self.drinking && self.ray.intersectObjects(self.beerTargets, false).length) ||
-            (!self.usbTween && self.ray.intersectObjects(self.usbTargets, false).length) ||
-            (!self.cdTween && self.ray.intersectObjects(self.cdTargets, false).length);
+          var hCig = !self.smoking && self.ray.intersectObjects(self.cigTargets, false).length;
+          var hBeer = !self.drinking && self.ray.intersectObjects(self.beerTargets, false).length;
+          var hUsb = !self.usbTween && self.ray.intersectObjects(self.usbTargets, false).length;
+          var hCd = !self.cdTween && self.ray.intersectObjects(self.cdTargets, false).length;
+          var hit = self.ray.intersectObjects(self.clickTargets, false).length || hCig || hBeer || hUsb || hCd;
+          if (self.glowSets) {
+            self.glowSets[0].hot = !!hCig; self.glowSets[1].hot = !!hBeer;
+            self.glowSets[2].hot = !!hUsb; self.glowSets[3].hot = !!hCd;
+          }
           canvas.style.cursor = hit ? 'pointer' : 'default';
         }
       });
@@ -841,6 +863,16 @@
         if (self._dead) return;
         self.raf = requestAnimationFrame(animate);
         var dt = Math.min(0.05, clock.getDelta());
+        if (self.glowSets) {
+          self.glowT += dt;
+          for (var gi = 0; gi < self.glowSets.length; gi++) {
+            var gs = self.glowSets[gi];
+            var gk = gs.hot ? 0.13 : 0.03 + 0.03 * (0.5 + 0.5 * Math.sin(self.glowT * 1.5 + gs.phase));
+            for (var gm = 0; gm < gs.mats.length; gm++) {
+              gs.mats[gm].emissive.setRGB(gk, gk * 0.92, gk * 0.78);
+            }
+          }
+        }
         if (self.tween) {
           var tw = self.tween; tw.t += dt / tw.dur; var k = Math.min(1, tw.t);
           var e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
