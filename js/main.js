@@ -1717,8 +1717,7 @@
       if (kind === 'notepad') {
         return { title: 'Untitled - Notepad', icon: 'notepad', width: 380, height: 300,
           body: '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>S</u>earch</span><span><u>H</u>elp</span></div>' +
-            '<textarea class="np-edit" spellcheck="false" placeholder="type something... it stays on this computer."></textarea>' +
-            '<div class="win-status"><span class="np-status">saved on this computer only</span></div>' };
+            '<textarea class="np-edit" spellcheck="false" placeholder="type something... it stays on this computer."></textarea>' };
       }
       // recycle -> the bin: a community list of things that are trash
       return { title: 'bin', icon: 'recycle', width: 360, height: 340,
