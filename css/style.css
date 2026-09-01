@@ -857,3 +857,5 @@ canvas#scene {
 }
 .mail-sent b { font-size: 14px; }
 .mail-sent span { color: #555; }
+
+.mail-row-to .mail-label { min-width: 0; }

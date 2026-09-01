@@ -1221,15 +1221,17 @@
         g.fillStyle = '#e0c869'; g.fillRect(10, 20, 11, 2);
         g.fillStyle = '#e0c869'; g.fillRect(10, 23.5, 8, 1.5);
       } else if (type === 'mail') {
-        g.fillStyle = 'rgba(0,0,0,.30)'; g.fillRect(6, 25, 22, 2);
-        g.fillStyle = '#f2eee2'; g.fillRect(4, 8, 24, 17);
-        g.strokeStyle = '#000'; g.lineWidth = 1; g.strokeRect(4.5, 8.5, 23, 16);
-        g.strokeStyle = '#a09880';
-        g.beginPath(); g.moveTo(5, 9); g.lineTo(16, 18); g.lineTo(27, 9); g.stroke();
-        g.strokeStyle = '#c8c0a8';
-        g.beginPath(); g.moveTo(5, 24); g.lineTo(13, 16); g.moveTo(27, 24); g.lineTo(19, 16); g.stroke();
-        g.fillStyle = '#d94a3a'; g.fillRect(21, 5, 6, 6);
-        g.strokeStyle = '#000'; g.strokeRect(21.5, 5.5, 5, 5);
+        var mi = window.MAIL_ICON_IMG;
+        var drawMi = function () {
+          var sc = cv.width / 32;
+          g.setTransform(sc, 0, 0, sc, 0, 0);
+          g.imageSmoothingEnabled = false;
+          g.clearRect(0, 0, 32, 32);
+          g.drawImage(mi, 2, 1, 28, 30);
+          g.setTransform(1, 0, 0, 1, 0, 0);
+        };
+        if (mi && mi.complete && mi.naturalWidth) drawMi();
+        else if (mi) mi.addEventListener('load', drawMi);
       } else if (type === 'cd') {
         g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(16, 28, 11, 2.5, 0, 0, 7); g.fill();
         g.fillStyle = '#dfe2e6'; g.beginPath(); g.arc(16, 15, 12, 0, 7); g.fill();
@@ -1770,8 +1772,8 @@
           body: '<div class="mail-toolbar"><button type="button" class="mail-send">&#9993; Send</button></div>' +
             '<div class="mail-form">' +
             '<div class="mail-head">New Message</div>' +
-            '<div class="mail-row"><span class="mail-label">To:</span><span class="mail-chip">Sam</span></div>' +
-            '<div class="mail-row"><span class="mail-label">From:</span><input type="text" class="mail-from" maxlength="80" placeholder="your name (or leave empty)"></div>' +
+            '<div class="mail-row mail-row-to"><span class="mail-label">To:</span><span class="mail-chip">Sam</span></div>' +
+            '<div class="mail-row"><span class="mail-label">From:</span><input type="text" class="mail-from" maxlength="80" placeholder="your email"></div>' +
             '<div class="mail-row"><span class="mail-label">Subject:</span><input type="text" class="mail-subject" maxlength="120"></div>' +
             '<textarea class="mail-body" spellcheck="false" placeholder="write your mail..."></textarea>' +
             '</div>' };
