@@ -268,7 +268,7 @@
         g.fillStyle = '#d9d0b8'; g.fillRect(0, 0, w, h);
         g.fillStyle = 'rgba(255,255,255,.10)'; g.fillRect(0, 0, w, 10);
         g.fillStyle = 'rgba(0,0,0,.06)'; g.fillRect(0, h - 8, w, 8);
-        g.fillStyle = '#7a715c'; g.font = 'bold 15px sans-serif'; g.fillText('NONAME', 20, h - 26);
+        g.fillStyle = '#7a715c'; g.font = 'bold 15px sans-serif'; g.fillText('yungxam.com', 20, h - 26);
         g.fillStyle = '#3a382f'; g.beginPath(); g.arc(w - 34, h - 30, 11, 0, 7); g.fill();
         g.strokeStyle = '#8f8770'; g.lineWidth = 1.5; g.beginPath(); g.arc(w - 34, h - 30, 6, 0.9 * Math.PI, 2.6 * Math.PI); g.stroke();
         g.fillStyle = '#5fe06a'; g.beginPath(); g.arc(w - 62, h - 30, 3.2, 0, 7); g.fill();
@@ -301,7 +301,6 @@
         g.strokeStyle = 'rgba(0,0,0,.3)'; g.lineWidth = 2; g.stroke();
         g.fillStyle = '#79a4c6'; g.fillRect(121, 326, 14, 14);
         g.fillStyle = 'rgba(0,0,0,.16)'; for (var i = 0; i < 11; i++) g.fillRect(40, 402 + i * 9, 176, 4);
-        g.fillStyle = 'rgba(46,44,40,.5)'; g.font = 'bold 17px monospace'; g.fillText('NONAME', 76, 492);
       });
       var keyTex = ctex(512, 224, function (g, w, h) {
         g.fillStyle = '#cabfa6'; g.fillRect(0, 0, w, h);
@@ -1717,7 +1716,7 @@
       if (kind === 'notepad') {
         return { title: 'Untitled - Notepad', icon: 'notepad', width: 380, height: 300,
           body: '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>S</u>earch</span><span><u>H</u>elp</span></div>' +
-            '<textarea class="np-edit" spellcheck="false" placeholder="type something... it stays on this computer."></textarea>' };
+            '<textarea class="np-edit" spellcheck="false" placeholder="type something..."></textarea>' };
       }
       // recycle -> the bin: a community list of things that are trash
       return { title: 'bin', icon: 'recycle', width: 360, height: 340,
