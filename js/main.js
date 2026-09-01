@@ -802,7 +802,7 @@
       var glow = new T.PointLight(0x7bd8ff, 0.5, 3.4); glow.position.copy(this.SCREEN_CTR).add(new T.Vector3(0, 0, 0.32)); scene.add(glow);
 
       // desktop icons (Win95): draw pixel-art icons and wire clicks
-      var iconTypeFor = function (app) { return app === 'notepad' ? 'notepad' : app === 'recycle' ? 'recycle' : app === 'friendbook' ? 'book' : 'folder'; };
+      var iconTypeFor = function (app) { return app === 'notepad' ? 'notepad' : app === 'recycle' ? 'recycle' : app === 'friendbook' ? 'book' : app === 'mail' ? 'mail' : 'folder'; };
       Array.prototype.forEach.call(els.desktop.querySelectorAll('.dicon'), function (ic) {
         var app = ic.getAttribute('data-app');
         self.drawIcon(ic.querySelector('canvas'), iconTypeFor(app));
@@ -1220,6 +1220,16 @@
         g.fillRect(13, 15, 5, 1);
         g.fillStyle = '#e0c869'; g.fillRect(10, 20, 11, 2);
         g.fillStyle = '#e0c869'; g.fillRect(10, 23.5, 8, 1.5);
+      } else if (type === 'mail') {
+        g.fillStyle = 'rgba(0,0,0,.30)'; g.fillRect(6, 25, 22, 2);
+        g.fillStyle = '#f2eee2'; g.fillRect(4, 8, 24, 17);
+        g.strokeStyle = '#000'; g.lineWidth = 1; g.strokeRect(4.5, 8.5, 23, 16);
+        g.strokeStyle = '#a09880';
+        g.beginPath(); g.moveTo(5, 9); g.lineTo(16, 18); g.lineTo(27, 9); g.stroke();
+        g.strokeStyle = '#c8c0a8';
+        g.beginPath(); g.moveTo(5, 24); g.lineTo(13, 16); g.moveTo(27, 24); g.lineTo(19, 16); g.stroke();
+        g.fillStyle = '#d94a3a'; g.fillRect(21, 5, 6, 6);
+        g.strokeStyle = '#000'; g.strokeRect(21.5, 5.5, 5, 5);
       } else if (type === 'cd') {
         g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(16, 28, 11, 2.5, 0, 0, 7); g.fill();
         g.fillStyle = '#dfe2e6'; g.beginPath(); g.arc(16, 15, 12, 0, 7); g.fill();
@@ -1597,6 +1607,40 @@
       btn.addEventListener('click', function () { self.click(); submit(); });
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
     },
+    setupMail: function (bodyEl, st) {
+      var self = this;
+      var btn = bodyEl.querySelector('.mail-send');
+      btn.addEventListener('click', function () {
+        var bodyTxt = bodyEl.querySelector('.mail-body').value.trim();
+        if (!bodyTxt) { bodyEl.querySelector('.mail-body').focus(); self.blip(300, 0.1); return; }
+        if (btn._busy) return;
+        btn._busy = true; btn.textContent = 'Sending\u2026';
+        self.click();
+        fetch(FB_API + '/rest/v1/mail', {
+          method: 'POST',
+          headers: fbHeaders({ 'Content-Type': 'application/json', Prefer: 'return=minimal' }),
+          body: JSON.stringify({
+            from_name: bodyEl.querySelector('.mail-from').value.trim() || null,
+            subject: bodyEl.querySelector('.mail-subject').value.trim() || null,
+            body: bodyTxt,
+          }),
+        }).then(function (r) {
+          if (!r.ok) throw new Error('mail ' + r.status);
+          self.beep();
+          var form = bodyEl.querySelector('.mail-form');
+          form.innerHTML = '<div class="mail-sent"><b>Message sent. &#9993;</b><span>it\u2019s in sam\u2019s inbox now.</span><button type="button" class="mail-ok">OK</button></div>';
+          bodyEl.querySelector('.mail-toolbar').style.display = 'none';
+          form.querySelector('.mail-ok').addEventListener('click', function () {
+            self.click(); if (st.tab) st.tab.remove(); st.win.remove();
+          });
+        }).catch(function () {
+          btn._busy = false; btn.textContent = '\u2709 Send';
+          self.blip(300, 0.1);
+          var head = bodyEl.querySelector('.mail-head');
+          if (head) head.textContent = "couldn't send \u2014 try again in a minute";
+        });
+      });
+    },
     setupNotepad: function (bodyEl) {
       var ta = bodyEl.querySelector('.np-edit');
       if (!ta) return;
@@ -1721,6 +1765,17 @@
             '<button type="button" class="fb-submit">Submit</button>' +
           '</div>' };
       }
+      if (kind === 'mail') {
+        return { title: 'Mail', icon: 'mail', width: 420, height: 360,
+          body: '<div class="mail-toolbar"><button type="button" class="mail-send">&#9993; Send</button></div>' +
+            '<div class="mail-form">' +
+            '<div class="mail-head">New Message</div>' +
+            '<div class="mail-row"><span class="mail-label">To:</span><span class="mail-chip">Sam</span></div>' +
+            '<div class="mail-row"><span class="mail-label">From:</span><input type="text" class="mail-from" maxlength="80" placeholder="your name (or leave empty)"></div>' +
+            '<div class="mail-row"><span class="mail-label">Subject:</span><input type="text" class="mail-subject" maxlength="120"></div>' +
+            '<textarea class="mail-body" spellcheck="false" placeholder="write your mail..."></textarea>' +
+            '</div>' };
+      }
       if (kind === 'notepad') {
         return { title: 'Untitled - Notepad', icon: 'notepad', width: 380, height: 300,
           body: '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>S</u>earch</span><span><u>H</u>elp</span></div>' +
@@ -1791,6 +1846,7 @@
       if (kind === 'friendsign') self.setupFriendSign(body, st);
       if (kind === 'recycle') self.setupBin(body);
       if (kind === 'notepad') self.setupNotepad(body);
+      if (kind === 'mail') self.setupMail(body, st);
 
       bClose.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); if (st.tab) st.tab.remove(); win.remove(); });
       bMin.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); self.minimizeWindow(st); });

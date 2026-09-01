@@ -818,3 +818,42 @@ canvas#scene {
     inset -2px -2px 0 #dfdfdf;
 }
 .np-edit::placeholder { color: #999; }
+
+/* ---- MAIL ---- */
+.mail-toolbar { flex: none; padding: 2px 0 4px; border-bottom: 1px solid #9a9a9a; }
+.mail-send, .mail-ok {
+  font-family: inherit; font-size: 12px; background: #c0c0c0;
+  border: 2px outset #fff; padding: 3px 12px; cursor: pointer;
+}
+.mail-send:active, .mail-ok:active { border-style: inset; }
+.mail-form {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  background: #fff;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff, inset 2px 2px 0 #000, inset -2px -2px 0 #dfdfdf;
+  padding: 8px;
+}
+.mail-head { font-size: 16px; font-weight: bold; padding-bottom: 6px; border-bottom: 1px solid #d8d8d8; }
+.mail-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 0; border-bottom: 1px solid #e6e6e6;
+  font-size: 12px;
+}
+.mail-label { color: #777; min-width: 48px; }
+.mail-chip { background: #cfe0f5; border: 1px solid #8aaad0; padding: 0 8px; font-size: 12px; }
+.mail-row input {
+  flex: 1; border: none; outline: none;
+  font-family: inherit; font-size: 12px; color: #000; background: transparent;
+}
+.mail-body {
+  flex: 1; min-height: 90px; margin-top: 6px;
+  border: none; outline: none; resize: none;
+  font-family: inherit; font-size: 12px; line-height: 1.4;
+  background: #fff; color: #000;
+}
+.mail-sent {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; text-align: center; font-size: 12px;
+}
+.mail-sent b { font-size: 14px; }
+.mail-sent span { color: #555; }
