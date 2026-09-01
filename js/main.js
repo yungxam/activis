@@ -1598,6 +1598,14 @@
       btn.addEventListener('click', function () { self.click(); submit(); });
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
     },
+    setupNotepad: function (bodyEl) {
+      var ta = bodyEl.querySelector('.np-edit');
+      if (!ta) return;
+      try { ta.value = localStorage.getItem('noname_notepad') || ''; } catch (e) {}
+      ta.addEventListener('input', function () {
+        try { localStorage.setItem('noname_notepad', ta.value); } catch (e) {}
+      });
+    },
     loadGallery: function (bodyEl) {
       var self = this;
       var grid = bodyEl.querySelector('.gal-grid');
@@ -1707,8 +1715,10 @@
           '</div>' };
       }
       if (kind === 'notepad') {
-        return { title: 'Untitled - Notepad', icon: 'notepad', width: 360,
-          body: '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>S</u>earch</span><span><u>H</u>elp</span></div><div class="np-area"><span class="np-caret">|</span></div>' };
+        return { title: 'Untitled - Notepad', icon: 'notepad', width: 380, height: 300,
+          body: '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>S</u>earch</span><span><u>H</u>elp</span></div>' +
+            '<textarea class="np-edit" spellcheck="false" placeholder="type something... it stays on this computer."></textarea>' +
+            '<div class="win-status"><span class="np-status">saved on this computer only</span></div>' };
       }
       // recycle -> the bin: a community list of things that are trash
       return { title: 'bin', icon: 'recycle', width: 360, height: 340,
@@ -1774,6 +1784,7 @@
       if (kind === 'friendbook') self.renderFriendbook(body);
       if (kind === 'friendsign') self.setupFriendSign(body, st);
       if (kind === 'recycle') self.setupBin(body);
+      if (kind === 'notepad') self.setupNotepad(body);
 
       bClose.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); if (st.tab) st.tab.remove(); win.remove(); });
       bMin.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); self.minimizeWindow(st); });

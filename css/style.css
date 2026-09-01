@@ -797,3 +797,24 @@ canvas#scene {
   border: 2px outset #fff; padding: 2px 12px; cursor: pointer;
 }
 .bin-add:active { border-style: inset; }
+
+/* ---- editable Notepad ---- */
+.np-edit {
+  flex: 1;
+  min-height: 120px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  background: #fff;
+  color: #000;
+  border: none;
+  resize: none;
+  outline: none;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #fff,
+    inset 2px 2px 0 #000,
+    inset -2px -2px 0 #dfdfdf;
+}
+.np-edit::placeholder { color: #999; }
