@@ -436,6 +436,19 @@
       var towerFront = PH({ map: towerTex, specular: 0x2a2a26, shininess: 12 });
       var keyTop = PH({ map: keyTex, specular: 0x2a2a26, shininess: 10 });
       var padM = PH({ map: mousepadTex, specular: 0x141414, shininess: 30 });
+      // ACTIVIS logo centered on the screensaver
+      if (window.SITE_LOGO_IMG) {
+        var stampLogo = function () {
+          var li = window.SITE_LOGO_IMG;
+          if (!li.naturalWidth) return;
+          var sc = screenTex.image, sg = sc.getContext('2d');
+          var lw = 60, lh = lw * li.naturalHeight / li.naturalWidth;
+          sg.drawImage(li, (sc.width - lw) / 2, (sc.height - lh) / 2 - 4, lw, lh);
+          screenTex.needsUpdate = true;
+        };
+        if (window.SITE_LOGO_IMG.complete) stampLogo();
+        else window.SITE_LOGO_IMG.addEventListener('load', stampLogo);
+      }
       this.screenMat = ps1(new T.MeshBasicMaterial({ map: screenTex }));
       var bezelM = PH({ color: 0xd9d0b8, specular: 0x33312a, shininess: 16 });
       var trimM = PH({ color: 0x15130f, specular: 0x1a1a1a, shininess: 10 });
@@ -1904,6 +1917,13 @@
       return st;
     },
   };
+
+  if (els.desktop && window.SITE_LOGO) {
+    els.desktop.style.backgroundImage = 'url(' + window.SITE_LOGO + ')';
+    els.desktop.style.backgroundRepeat = 'no-repeat';
+    els.desktop.style.backgroundPosition = 'center 46%';
+    els.desktop.style.backgroundSize = 'auto 42%';
+  }
 
   els.muteBtn.addEventListener('click', function () { App.toggleMute(); });
   els.backBtn.addEventListener('click', function () { App.flyOut(); });
