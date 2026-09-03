@@ -442,7 +442,7 @@
           var li = window.SITE_LOGO_IMG;
           if (!li.naturalWidth) return;
           var sc = screenTex.image, sg = sc.getContext('2d');
-          var lw = 60, lh = lw * li.naturalHeight / li.naturalWidth;
+          var lw = 45, lh = lw * li.naturalHeight / li.naturalWidth;
           sg.drawImage(li, (sc.width - lw) / 2, (sc.height - lh) / 2 - 4, lw, lh);
           screenTex.needsUpdate = true;
         };
