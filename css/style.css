@@ -916,3 +916,57 @@ canvas#scene {
 }
 .sm-item canvas { width: 26px; height: 26px; image-rendering: pixelated; flex: none; }
 .sm-item:hover { background: #000080; color: #fff; }
+
+/* ---- mobile: rotate-your-phone overlay ---- */
+#rotateHint {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  background: #06080a;
+}
+.rh-phone {
+  width: 46px;
+  height: 84px;
+  border: 4px solid #d3d9d4;
+  border-radius: 8px;
+  position: relative;
+  animation: rhrotate 2.2s ease-in-out infinite;
+}
+.rh-phone::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 4px;
+  border-radius: 2px;
+  background: #d3d9d4;
+}
+@keyframes rhrotate {
+  0%, 25% { transform: rotate(0deg); }
+  55%, 80% { transform: rotate(90deg); }
+  100% { transform: rotate(90deg); }
+}
+.rh-text {
+  font-family: 'Silkscreen', monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #d3d9d4;
+  text-shadow: 0 2px 0 #000;
+  animation: hintpulse 1.8s infinite;
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotateHint { display: flex; }
+}
+
+/* ---- mobile: keep Win95 windows on screen ---- */
+@media (max-width: 760px) {
+  .win { max-width: 96vw; max-height: calc(100% - 40px); }
+  #deskIcons { gap: 10px; }
+}

@@ -902,16 +902,40 @@
           canvas.style.cursor = hit ? 'pointer' : 'default';
         }
       });
-      stage.addEventListener('pointerdown', function () {
+      var coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      stage.addEventListener('pointerdown', function (e) {
         self.initAudio();
         if (self.introActive || self.reactionActive) return;
         if (self.view === 'desk' && !self.tween) {
+          // read the pointer position from this event itself: on touch there is
+          // no pointermove beforehand, so mx/my would be stale
+          var r = stage.getBoundingClientRect();
+          self.mx = ((e.clientX - r.left) / r.width) * 2 - 1;
+          self.my = -(((e.clientY - r.top) / r.height) * 2 - 1);
           self.ray.setFromCamera(new T.Vector2(self.mx, self.my), cam);
+          // forgiving hit test for touch: retry the raycast in a small ring
+          // around the tap before giving up
+          var hitAny = function (targets) {
+            if (self.ray.intersectObjects(targets, false).length) return true;
+            if (!coarsePointer) return false;
+            var offs = [[14, 0], [-14, 0], [0, 14], [0, -14], [10, 10], [-10, 10], [10, -10], [-10, -10]];
+            for (var oi = 0; oi < offs.length; oi++) {
+              var nx = self.mx + (offs[oi][0] / r.width) * 2;
+              var ny = self.my - (offs[oi][1] / r.height) * 2;
+              self.ray.setFromCamera(new T.Vector2(nx, ny), cam);
+              if (self.ray.intersectObjects(targets, false).length) {
+                self.ray.setFromCamera(new T.Vector2(self.mx, self.my), cam);
+                return true;
+              }
+            }
+            self.ray.setFromCamera(new T.Vector2(self.mx, self.my), cam);
+            return false;
+          };
           if (self.ray.intersectObjects(self.clickTargets, false).length) { self.flyIn(); return; }
-          if (!self.usbTween && self.ray.intersectObjects(self.usbTargets, false).length) { self.toggleUsb(); return; }
-          if (!self.cdTween && self.ray.intersectObjects(self.cdTargets, false).length) { self.toggleCd(); return; }
-          if (!self.drinking && self.ray.intersectObjects(self.beerTargets, false).length) { self.drinkBeer(); return; }
-          if (!self.smoking && self.ray.intersectObjects(self.cigTargets, false).length) self.smoke();
+          if (!self.usbTween && hitAny(self.usbTargets)) { self.toggleUsb(); return; }
+          if (!self.cdTween && hitAny(self.cdTargets)) { self.toggleCd(); return; }
+          if (!self.drinking && hitAny(self.beerTargets)) { self.drinkBeer(); return; }
+          if (!self.smoking && hitAny(self.cigTargets)) self.smoke();
         }
       });
       els.dialogueBox.addEventListener('click', function (e) {
