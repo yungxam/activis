@@ -16,10 +16,10 @@
 
   // Start-menu social links — fill these in when ready (empty = click does nothing yet)
   var SOCIAL_LINKS = {
-    strava: '',
-    instagram: '',
-    labwear: '',
-    linkedin: '',
+    strava: 'https://strava.app.link/MD6KvR5ag6b',
+    instagram: 'https://www.instagram.com/_yungxam_/',
+    labwear: 'https://www.labwearstudios.com/',
+    linkedin: 'https://www.linkedin.com/in/samuel-thoma-5843a31ba/',
   };
 
   var els = {
