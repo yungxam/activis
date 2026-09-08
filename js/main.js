@@ -1922,7 +1922,7 @@
     els.desktop.style.backgroundImage = 'url(' + window.SITE_LOGO + ')';
     els.desktop.style.backgroundRepeat = 'no-repeat';
     els.desktop.style.backgroundPosition = 'center 46%';
-    els.desktop.style.backgroundSize = 'auto 42%';
+    els.desktop.style.backgroundSize = 'auto 36%';
   }
 
   els.muteBtn.addEventListener('click', function () { App.toggleMute(); });
