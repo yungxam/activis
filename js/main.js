@@ -14,6 +14,14 @@
     return h;
   };
 
+  // Start-menu social links — fill these in when ready (empty = click does nothing yet)
+  var SOCIAL_LINKS = {
+    strava: '',
+    instagram: '',
+    labwear: '',
+    linkedin: '',
+  };
+
   var els = {
     stage: document.getElementById('stage'),
     canvas: document.getElementById('scene'),
@@ -822,7 +830,59 @@
         ic.addEventListener('click', function () { self.openWindow(app); });
       });
       self.drawIcon(els.startFlag, 'flag');
-      els.startBtn.addEventListener('click', function () { self.beep(); });
+      var startMenu = document.getElementById('startMenu');
+      var drawSocialIcon = function (cv, kind) {
+        var gg = cv.getContext('2d'); gg.imageSmoothingEnabled = false;
+        gg.clearRect(0, 0, 24, 24);
+        var rr = function (c) { gg.fillStyle = c; gg.fillRect(2, 2, 20, 20); gg.strokeStyle = 'rgba(0,0,0,.45)'; gg.strokeRect(2.5, 2.5, 19, 19); };
+        if (kind === 'strava') {
+          rr('#fc4c02');
+          gg.fillStyle = '#fff';
+          gg.beginPath(); gg.moveTo(12, 6); gg.lineTo(16.5, 14); gg.lineTo(13.7, 14); gg.lineTo(12, 11); gg.lineTo(10.3, 14); gg.lineTo(7.5, 14); gg.closePath(); gg.fill();
+          gg.fillStyle = 'rgba(255,255,255,.75)';
+          gg.beginPath(); gg.moveTo(14.8, 14); gg.lineTo(16.9, 18); gg.lineTo(19, 14); gg.lineTo(17.5, 14); gg.lineTo(16.9, 15.4); gg.lineTo(16.3, 14); gg.closePath(); gg.fill();
+        } else if (kind === 'instagram') {
+          var gr = gg.createLinearGradient(2, 22, 22, 2);
+          gr.addColorStop(0, '#f9ce34'); gr.addColorStop(0.5, '#ee2a7b'); gr.addColorStop(1, '#6228d7');
+          gg.fillStyle = gr; gg.fillRect(2, 2, 20, 20);
+          gg.strokeStyle = 'rgba(0,0,0,.45)'; gg.strokeRect(2.5, 2.5, 19, 19);
+          gg.strokeStyle = '#fff'; gg.lineWidth = 1.6;
+          gg.strokeRect(6, 6, 12, 12);
+          gg.beginPath(); gg.arc(12, 12, 3.4, 0, 7); gg.stroke();
+          gg.fillStyle = '#fff'; gg.beginPath(); gg.arc(16, 8, 1.1, 0, 7); gg.fill();
+        } else if (kind === 'labwear') {
+          rr('#1d8a4a');
+          gg.fillStyle = '#fff';
+          gg.beginPath();
+          gg.moveTo(9, 6); gg.lineTo(15, 6); gg.lineTo(18, 9); gg.lineTo(16, 11.5); gg.lineTo(15, 10.5); gg.lineTo(15, 18); gg.lineTo(9, 18); gg.lineTo(9, 10.5); gg.lineTo(8, 11.5); gg.lineTo(6, 9); gg.closePath(); gg.fill();
+          gg.fillStyle = '#1d8a4a'; gg.beginPath(); gg.arc(12, 6.5, 1.6, 0, Math.PI); gg.fill();
+        } else if (kind === 'linkedin') {
+          rr('#0a66c2');
+          gg.fillStyle = '#fff'; gg.font = 'bold 11px sans-serif'; gg.textBaseline = 'alphabetic';
+          gg.fillText('in', 8, 17);
+        }
+      };
+      Array.prototype.forEach.call(startMenu.querySelectorAll('.sm-item'), function (it) {
+        drawSocialIcon(it.querySelector('canvas'), it.getAttribute('data-social'));
+        var url = SOCIAL_LINKS[it.getAttribute('data-social')] || '';
+        if (url) it.href = url;
+        it.addEventListener('click', function (ev) {
+          if (!url) ev.preventDefault();
+          self.click();
+          startMenu.classList.remove('open');
+        });
+      });
+      els.startBtn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        self.beep();
+        startMenu.classList.toggle('open');
+      });
+      document.addEventListener('pointerdown', function (ev) {
+        if (!startMenu.classList.contains('open')) return;
+        if (!startMenu.contains(ev.target) && ev.target !== els.startBtn && !els.startBtn.contains(ev.target)) {
+          startMenu.classList.remove('open');
+        }
+      }, true);
 
       stage.addEventListener('pointermove', function (e) {
         var r = stage.getBoundingClientRect();
