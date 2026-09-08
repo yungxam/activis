@@ -18,7 +18,7 @@ audio_shim = "window.BEER_AUDIO='data:audio/mpeg;base64,%s';" % beer_audio
 
 scripts = ['vendor/three.min.js', 'js/hand-sprite.js', 'js/beer-sprite.js',
            'js/poster-sprite.js', 'js/poster2-sprite.js', 'js/photo-sprite.js',
-           'js/pad-sprite.js', 'js/mail-icon.js', 'js/logo-sprite.js', 'js/main.js']
+           'js/pad-sprite.js', 'js/mail-icon.js', 'js/logo-sprite.js', 'js/photos-icon.js', 'js/main.js']
 js_all = audio_shim + '\n' + '\n'.join('/*==== %s ====*/\n%s' % (s, rd(s)) for s in scripts)
 
 body = html

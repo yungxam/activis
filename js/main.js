@@ -815,7 +815,7 @@
       var glow = new T.PointLight(0x7bd8ff, 0.5, 3.4); glow.position.copy(this.SCREEN_CTR).add(new T.Vector3(0, 0, 0.32)); scene.add(glow);
 
       // desktop icons (Win95): draw pixel-art icons and wire clicks
-      var iconTypeFor = function (app) { return app === 'notepad' ? 'notepad' : app === 'recycle' ? 'recycle' : app === 'friendbook' ? 'book' : app === 'mail' ? 'mail' : 'folder'; };
+      var iconTypeFor = function (app) { return app === 'notepad' ? 'notepad' : app === 'recycle' ? 'recycle' : app === 'friendbook' ? 'book' : app === 'mail' ? 'mail' : app === 'images' ? 'photos' : 'folder'; };
       Array.prototype.forEach.call(els.desktop.querySelectorAll('.dicon'), function (ic) {
         var app = ic.getAttribute('data-app');
         self.drawIcon(ic.querySelector('canvas'), iconTypeFor(app));
@@ -1233,6 +1233,18 @@
         g.fillRect(13, 15, 5, 1);
         g.fillStyle = '#e0c869'; g.fillRect(10, 20, 11, 2);
         g.fillStyle = '#e0c869'; g.fillRect(10, 23.5, 8, 1.5);
+      } else if (type === 'photos') {
+        var pi = window.PHOTOS_ICON_IMG;
+        var drawPi = function () {
+          var psc = cv.width / 32;
+          g.setTransform(psc, 0, 0, psc, 0, 0);
+          g.imageSmoothingEnabled = false;
+          g.clearRect(0, 0, 32, 32);
+          g.drawImage(pi, 1, 3, 30, 27);
+          g.setTransform(1, 0, 0, 1, 0, 0);
+        };
+        if (pi && pi.complete && pi.naturalWidth) drawPi();
+        else if (pi) pi.addEventListener('load', drawPi);
       } else if (type === 'mail') {
         var mi = window.MAIL_ICON_IMG;
         var drawMi = function () {
@@ -1749,12 +1761,19 @@
     winInfo: function (kind) {
       var menu = '<div class="win-menu"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span></div>';
       if (kind === 'images') {
-        return { title: 'IMAGES', icon: 'folder', width: 470, height: 360,
+        return { title: 'Photos', icon: 'photos', width: 470, height: 360,
           body: menu + '<div class="win-inset gal-inset"><div class="gal-grid">Loading gallery&hellip;</div></div><div class="win-status"><span class="gal-count">&mdash;</span></div>' };
       }
       if (kind === 'noname') {
-        return { title: 'NONAME', icon: 'folder', width: 320,
-          body: menu + '<div class="win-inset"><b>noname.txt</b><br>&gt; this file has no name.<br>&gt; contents not yet written.<br><br>[ PLACEHOLDER ]</div>' };
+        return { title: 'Portfolio', icon: 'folder', width: 380, height: 260,
+          body: menu + '<div class="win-inset pf-inset"><div class="pf-grid">' +
+            ['ACTIVIS', 'LABWEAR', 'AMANO', 'OTHER'].map(function (n) {
+              return '<div class="pf-item" data-pf="' + n + '"><canvas width="32" height="32"></canvas><span>' + n + '</span></div>';
+            }).join('') + '</div></div>' };
+      }
+      if (kind.indexOf('psub:') === 0) {
+        return { title: kind.slice(5), icon: 'folder', width: 280,
+          body: menu + '<div class="win-inset win-empty"><b>Coming Soon</b></div>' };
       }
       if (kind === 'nudes') {
         return { title: 'NUDES', icon: 'folder', width: 320,
@@ -1862,6 +1881,12 @@
       if (kind === 'recycle') self.setupBin(body);
       if (kind === 'notepad') self.setupNotepad(body);
       if (kind === 'mail') self.setupMail(body, st);
+      if (kind === 'noname') {
+        Array.prototype.forEach.call(body.querySelectorAll('.pf-item'), function (it) {
+          self.drawIcon(it.querySelector('canvas'), 'folder');
+          it.addEventListener('click', function () { self.click(); self.openWindow('psub:' + it.getAttribute('data-pf')); });
+        });
+      }
 
       bClose.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); if (st.tab) st.tab.remove(); win.remove(); });
       bMin.addEventListener('click', function (ev) { ev.stopPropagation(); self.click(); self.minimizeWindow(st); });

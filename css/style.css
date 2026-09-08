@@ -858,3 +858,15 @@ canvas#scene {
 .mail-sent b { font-size: 14px; }
 .mail-sent span { color: #555; }
 
+
+/* ---- Portfolio folder grid ---- */
+.pf-inset { display: flex; }
+.pf-grid { display: flex; flex-wrap: wrap; gap: 14px; align-content: flex-start; padding: 6px; }
+.pf-item {
+  width: 72px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; text-align: center;
+}
+.pf-item canvas { width: 36px; height: 36px; image-rendering: pixelated; }
+.pf-item span { font-size: 11px; }
+.pf-item:active span { background: #000080; color: #fff; }
