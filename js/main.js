@@ -1835,7 +1835,7 @@
       var it = this._lbItems[this._lbIdx];
       var img = this._lb.querySelector('.glb-img');
       var cap = this._lb.querySelector('.glb-cap');
-      img.src = './gallery/' + it.full;
+      img.src = it.full.indexOf('data:') === 0 ? it.full : './gallery/' + it.full;
       img.alt = it.alt || it.id || '';
       if (cap) cap.textContent = (this._lbIdx + 1) + ' / ' + this._lbItems.length;
       var multi = this._lbItems.length > 1;
@@ -1860,8 +1860,8 @@
           body: menu + '<div class="win-inset win-empty"><b>Coming Soon</b></div>' };
       }
       if (kind === 'nudes') {
-        return { title: 'NUDES', icon: 'folder', width: 320,
-          body: menu + '<div class="win-inset win-empty"><b>This folder is empty.</b><span>0 object(s) &mdash; [ PLACEHOLDER ]</span></div>' };
+        return { title: 'NUDES', icon: 'folder', width: 330, height: 430,
+          body: menu + '<div class="win-inset nd-inset"><img class="nd-img" alt="me.jpg"></div><div class="win-status"><span>1 object(s)</span></div>' };
       }
       if (kind === 'bangers') {
         return { title: 'Bangers', icon: 'cd', width: 340,
@@ -1963,6 +1963,15 @@
       if (kind === 'friendbook') self.renderFriendbook(body);
       if (kind === 'friendsign') self.setupFriendSign(body, st);
       if (kind === 'recycle') self.setupBin(body);
+      if (kind === 'nudes') {
+        var ndImg = body.querySelector('.nd-img');
+        if (ndImg && window.NUDES_PHOTO) {
+          ndImg.src = window.NUDES_PHOTO;
+          ndImg.addEventListener('click', function () {
+            self.openLightbox([{ full: window.NUDES_PHOTO, id: 'me' }], 0);
+          });
+        }
+      }
       if (kind === 'notepad') self.setupNotepad(body);
       if (kind === 'mail') self.setupMail(body, st);
       if (kind === 'noname') {
