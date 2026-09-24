@@ -4,7 +4,7 @@
   /* ---------- tweakable constants (were DC editor props) ---------- */
   var PIXEL_SCALE = 1;        // 1 = full internal resolution (crisp PS2/PS3-era look)
   var ENABLE_JITTER = false;  // PS1 vertex wobble, off for the realistic look
-  var START_MUTED = true;     // site starts muted; user opts in via the SOUND button
+  var START_MUTED = false;    // sound is always on (no ambient loop, no toggle)
 
   var FB_API = 'https://waodcyzcofiwydaylxse.supabase.co';
   var FB_KEY = 'sb_publishable_DepJKE92L3GdLzwYUCnGDQ_0Fq9JGZT';
@@ -26,7 +26,6 @@
     stage: document.getElementById('stage'),
     canvas: document.getElementById('scene'),
     hint: document.getElementById('hint'),
-    muteBtn: document.getElementById('muteBtn'),
     overlay: document.getElementById('overlay'),
     desktop: document.getElementById('desktop'),
     deskIcons: document.getElementById('deskIcons'),
@@ -96,18 +95,7 @@
       var AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       var A = new AC(); this.actx = A;
-      var m = A.createGain(); m.gain.value = this.muted ? 0 : 0.5; m.connect(A.destination); this.master = m;
-      var hum = A.createOscillator(); hum.type = 'sine'; hum.frequency.value = 60;
-      var hg = A.createGain(); hg.gain.value = 0.05; hum.connect(hg).connect(m); hum.start();
-      var wh = A.createOscillator(); wh.type = 'sine'; wh.frequency.value = 15600;
-      var wg = A.createGain(); wg.gain.value = 0.006; wh.connect(wg).connect(m); wh.start();
-      var buf = A.createBuffer(1, A.sampleRate * 2, A.sampleRate);
-      var d = buf.getChannelData(0);
-      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-      var ns = A.createBufferSource(); ns.buffer = buf; ns.loop = true;
-      var nf = A.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 7000;
-      var ng = A.createGain(); ng.gain.value = 0.006;
-      ns.connect(nf).connect(ng).connect(m); ns.start();
+      var m = A.createGain(); m.gain.value = 0.5; m.connect(A.destination); this.master = m;
     },
     blip: function (f, dur, type) {
       if (!this.actx || this.muted) return;
@@ -134,11 +122,6 @@
         var p = this._beerSnd.play();
         if (p && p.catch) p.catch(function () {});
       } catch (e) {}
-    },
-    toggleMute: function () {
-      this.muted = !this.muted;
-      if (this.master) this.master.gain.value = this.muted ? 0 : 0.5;
-      els.muteBtn.textContent = 'SOUND: ' + (this.muted ? 'OFF' : 'ON');
     },
 
     /* ---------- SCENE ---------- */
@@ -1444,13 +1427,12 @@
         from: { pos: this.cam.position.clone(), look: this.SCREEN_CTR.clone() },
         to: { pos: this.BASE.clone(), look: this.LOOK.clone() },
         t: 0, dur: 1.05,
-        onDone: function () { self.view = 'desk'; els.hint.style.display = 'block'; els.muteBtn.style.display = ''; },
+        onDone: function () { self.view = 'desk'; els.hint.style.display = 'block'; },
       };
     },
     enterDesktop: function () {
       els.overlay.style.display = 'block';
       els.overlay.style.pointerEvents = 'auto';
-      els.muteBtn.style.display = 'none';
       this.updateNudesFolder();
       this.updateBangersFile();
       this.beep();
@@ -2043,9 +2025,7 @@
     els.desktop.style.backgroundSize = 'auto 36%';
   }
 
-  els.muteBtn.addEventListener('click', function () { App.toggleMute(); });
   els.backBtn.addEventListener('click', function () { App.flyOut(); });
-  els.muteBtn.textContent = 'SOUND: ' + (App.muted ? 'OFF' : 'ON');
 
   var wait = function () {
     if (window.THREE) {
