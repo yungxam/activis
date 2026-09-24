@@ -63,12 +63,12 @@
       "and also please don't smoke in here!",
     ],
     smokeLines: [
-      'Ayoo!?? What did I tell you??',
-      'Whatever...',
-      'Can you give me one too??',
+      'Ayoo!??',
+      'Dude, STOP!',
+      'You do wanna get that smoke huhhh',
     ],
     beerLines: [
-      'Dude what the helly, how about asking if you can have a beer!??',
+      'Next time, bring your own beer...',
       'Alright there goes the second one...',
       'Your family is right...You do have a drinking problem...',
     ],
