@@ -1737,14 +1737,17 @@
         .then(function (r) { if (!r.ok) throw new Error('no manifest'); return r.json(); })
         .then(function (items) {
           if (!items || !items.length) { grid.classList.add('gal-msg'); grid.innerHTML = emptyMsg; if (countEl) countEl.textContent = '0 object(s)'; return; }
-          // stable scramble: order by a hash of each id so shots from the same
-          // batch never cluster, yet everyone sees the same order every visit
+          // display order: 'ord' is precomputed offline so visually similar
+          // shots sit far apart; entries without one scatter by id hash
           var hmix = function (str) {
             var h = 2166136261;
             for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = (h * 16777619) >>> 0; }
             return h;
           };
-          items.sort(function (a, b) { return hmix(a.id || '') - hmix(b.id || ''); });
+          var key = function (it) {
+            return typeof it.ord === 'number' ? it.ord : (hmix(it.id || '') / 4294967296) * items.length;
+          };
+          items.sort(function (a, b) { return key(a) - key(b); });
           grid.classList.remove('gal-msg');
           grid.innerHTML = '';
           items.forEach(function (it, idx) {
