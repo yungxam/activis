@@ -4,7 +4,6 @@
   /* ---------- tweakable constants (were DC editor props) ---------- */
   var PIXEL_SCALE = 1;        // 1 = full internal resolution (crisp PS2/PS3-era look)
   var ENABLE_JITTER = false;  // PS1 vertex wobble, off for the realistic look
-  var START_MUTED = false;    // sound is always on (no ambient loop, no toggle)
 
   var FB_API = 'https://waodcyzcofiwydaylxse.supabase.co';
   var FB_KEY = 'sb_publishable_DepJKE92L3GdLzwYUCnGDQ_0Fq9JGZT';
@@ -52,7 +51,6 @@
     booted: false,
     winCount: 0,
     zTop: 40,
-    muted: START_MUTED,
     _dead: false,
     introActive: false,
     introIndex: 0,
@@ -90,27 +88,13 @@
     },
 
     /* ---------- AUDIO ---------- */
-    initAudio: function () {
-      if (this.actx) return;
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return;
-      var A = new AC(); this.actx = A;
-      var m = A.createGain(); m.gain.value = 0.5; m.connect(A.destination); this.master = m;
-    },
-    blip: function (f, dur, type) {
-      if (!this.actx || this.muted) return;
-      var A = this.actx, o = A.createOscillator(), g = A.createGain();
-      o.type = type || 'square'; o.frequency.value = f; o.connect(g).connect(this.master);
-      var t = A.currentTime;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.16, t + 0.004);
-      g.gain.exponentialRampToValueAtTime(0.001, t + (dur || 0.07));
-      o.start(t); o.stop(t + (dur || 0.07) + 0.02);
-    },
-    click: function () { this.blip(1300, 0.04, 'square'); },
-    beep: function () { this.blip(720, 0.11, 'square'); },
+    // all synth sounds (ambient loop, UI clicks/beeps) removed by request;
+    // the stubs keep old call sites inert — only the beer clip plays
+    initAudio: function () {},
+    blip: function () {},
+    click: function () {},
+    beep: function () {},
     playBeerSound: function () {
-      if (this.muted) return;
       if (!this._beerSnd) {
         this._beerSnd = new Audio(window.BEER_AUDIO || './assets/beer-drink.mp3');
         this._beerSnd.preload = 'auto';
