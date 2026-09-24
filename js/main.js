@@ -2014,6 +2014,30 @@
 
   els.backBtn.addEventListener('click', function () { App.flyOut(); });
 
+  // Instagram/Facebook in-app browsers are portrait-locked, so the "rotate
+  // your phone" hint can never be satisfied there. Swap it for an
+  // open-in-real-browser panel instead.
+  (function () {
+    var ua = navigator.userAgent || '';
+    var inApp = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger/i.test(ua);
+    var rh = document.getElementById('rotateHint');
+    var panel = document.getElementById('rhInapp');
+    if (!inApp || !rh || !panel) return;
+    rh.classList.add('inapp');
+    panel.style.display = 'flex';
+    document.getElementById('rhOpenBtn').addEventListener('click', function () {
+      var here = location.host + location.pathname + location.search;
+      if (/android/i.test(ua)) {
+        location.href = 'intent://' + here + '#Intent;scheme=https;end';
+      } else {
+        location.href = 'x-safari-https://' + here;
+      }
+    });
+    document.getElementById('rhSkipBtn').addEventListener('click', function () {
+      rh.style.display = 'none';
+    });
+  })();
+
   var wait = function () {
     if (window.THREE) {
       try { App.init(); } catch (e) { console.error(e); }
