@@ -995,23 +995,15 @@ canvas#scene {
   cursor: pointer;
 }
 #rhOpenBtn:active { border-color: #404040 #fff #fff #404040; }
-.rh-inapp-tip {
-  font-family: 'VT323', monospace;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #8b959b;
-}
-#rhSkipBtn,
 #rhCopyBtn {
   font-family: 'VT323', monospace;
   font-size: 16px;
   background: none;
   border: none;
-  color: #8b959b;
+  color: #d3d9d4;
   text-decoration: underline;
   cursor: pointer;
 }
-#rhCopyBtn { color: #d3d9d4; }
 
 /* ---- mobile: keep Win95 windows on screen ---- */
 @media (max-width: 760px) {

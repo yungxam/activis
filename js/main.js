@@ -2049,9 +2049,6 @@
         navigator.clipboard.writeText(url).then(done, manual);
       } else { manual(); }
     });
-    document.getElementById('rhSkipBtn').addEventListener('click', function () {
-      rh.style.display = 'none';
-    });
   })();
 
   var wait = function () {
