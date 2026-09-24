@@ -2029,9 +2029,25 @@
       var here = location.host + location.pathname + location.search;
       if (/android/i.test(ua)) {
         location.href = 'intent://' + here + '#Intent;scheme=https;end';
-      } else {
-        location.href = 'x-safari-https://' + here;
+        return;
       }
+      // iOS: some Instagram versions block the direct Safari scheme, so if
+      // the page is still visible shortly after, fall back to the system
+      // share sheet, which can hand the link to Safari.
+      location.href = 'x-safari-https://' + here;
+      setTimeout(function () {
+        if (document.hidden) return;
+        if (navigator.share) navigator.share({ url: 'https://' + here }).catch(function () {});
+      }, 900);
+    });
+    var copyBtn = document.getElementById('rhCopyBtn');
+    copyBtn.addEventListener('click', function () {
+      var url = 'https://' + location.host + location.pathname + location.search;
+      var done = function () { copyBtn.textContent = 'copied! now paste it in safari'; };
+      var manual = function () { window.prompt('copy this link:', url); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done, manual);
+      } else { manual(); }
     });
     document.getElementById('rhSkipBtn').addEventListener('click', function () {
       rh.style.display = 'none';
